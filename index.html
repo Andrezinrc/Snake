@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/styles/index.css">
+    <link rel="stylesheet" href="assets/styles/mobile.css">
+    <title>Menu do Jogo</title>
+</head>
+
+<body>
+   <header class="cabecalho">
+      <nav class="nav-bar">
+          <div class="hamburguer" id="btn-menu">
+            <span class="line"></span>
+            <span class="line"></span>
+            <span class="line"></span>
+          </div>
+
+          <ul id="menu" class="menu">
+              <h2>Sobre</h2>
+              <p>Desafie-se e crie o seu recorde!<br><br> O jogo não tem limite de tempo, mas a velocidade  aumenta com o tempo, tornando-o mais difícil.<br><br> Colete maçãs para ganhar pontos e veja  até onde você consegue chegar!<br><br> <strong>Boa sorte!</strong></p>
+          </ul>
+      </nav>
+   </header>
+
+  <main>
+    <h1>Jogo da Cobrinha</h1>
+    <div id="menu">
+
+      <br><br>
+
+      <div class="input-container-select">
+        <p>Escolha a Cor de Fundo</p>
+        <select id="colorSelect">
+            <option value="#C1E1C1">Cor Atual</option>
+            <option value="#A3D9FF">Azul Claro</option>
+            <option value="#FDCB82">Laranja Claro</option>
+            <option value="#E8AAE0">Rosa</option>
+        </select>
+      </div>
+
+      <button class="button" onclick="iniciarJogo()">Começar</button
+      
+    </div>
+  </main>
+  <footer>
+    <p class="dev-jogo">Orgulhosamente feito por Andrezinrc</p>
+  </footer>
+  <script src="src/index.js"></script>
+</body>
+</html>
