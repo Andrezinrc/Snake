@@ -38,6 +38,7 @@
         align-items: center;
         transition: background-color 0.3s, transform 0.2s;
         touch-action: manipulation;
+        user-select: none;
     }
 
     #cima:hover, #baixo:hover, #esquerda:hover, #direita:hover {
