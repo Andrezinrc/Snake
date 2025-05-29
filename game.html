@@ -91,6 +91,27 @@
         document.body.style.backgroundColor = corDeFundo;
       }
     });
+    
+    (function() {
+      var largura = window.innerWidth;
+      
+      var meta = document.querySelector('meta[name=viewport]');
+      if (meta) {
+        meta.parentNode.removeChild(meta);
+      }
+      
+      var novaMeta = document.createElement('meta');
+      novaMeta.name = 'viewport';
+      
+      // Se a tela for muito pequena, força um "viewport" mais largo
+      if (largura <= 400) {
+        novaMeta.content = 'width=480, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+      } else {
+        novaMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+      }
+      
+      document.head.appendChild(novaMeta);
+    })();
   </script>
   </body>
 </html>
