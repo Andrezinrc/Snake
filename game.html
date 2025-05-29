@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="assets/styles/style.css">
+  <link rel="stylesheet" href="assets/styles/mobile.css">
+  <title>Jogo da cobrinha</title>
+</head>
+<body>
+
+  <div class="container">
+    <canvas id="gameCanvas"></canvas>
+
+    <!--Menssagem perdeu-->
+    <h2 id="voce-perdeu">Você perdeu!</h2>
+
+    <!--Botoes mobile-->
+    <div class="botoes" id="botoes">
+      <div id="cima">&#8593;</div>
+      <div id="baixo">&#8595;</div>
+      <div id="esquerda">&#8592;</div>
+      <div id="direita">&#8594;</div>
+    </div>
+
+    <!--Botao Jogar novamente-->
+    <div id="jogar-novamente" onclick="Carregar()">
+      <h1>Jogar Novamente</h1>
+    </div>
+    <!--Botao voltar-->
+     <div class="botao-voltar" id="voltar" onclick="Voltar">
+      <a href="index.html">Voltar</a>
+    </div>
+    <!--Botao pausar-->
+    <div class="botao-pause" id="pausar"></div>
+    <!--Botao continuar-->
+    <div id="continuar" id="continuar">
+      <h1>Continuar</h1>
+    </div>
+    <!--Botao sair-->
+     <div class="sair" id="sair">
+      <a href="https://www.google.com.br">Sair</a>
+    </div>
+    <!--Score-->
+    <div id="pontuacao" class="pontuacao">Pontuação: 0</div>
+    <!--tempo de jogo-->
+    <p id="tempo" class="tempo">0</p>
+    <!--Tempo do poder-->
+    <p id="tempo-poder" class="tempo-poder"></p>
+    <!--Animacao do poder-->
+    <div class="pisca-pisca"></div>
+  </div>
+  
+  <!--explicando o jogo-->
+  <div class="sobre" id="sobre">
+    <div class="fechar-sobre" id="fechar-sobre">
+      <img src="assets/img/fechar.png" loading="lazy">
+    </div>
+    <h3>
+       Neste jogo da Cobrinha, colete o quadrado vermelho para ganhar pontos e aumentar seu recorde. O quadrado Roxo é um poder especial que te deixa imune de colisão por 7 segundos. Desvie de você mesmo e tente bater seu maior recorde.
+    </h3>
+  </div>
+  
+  <script type="module" src="src/game.js"></script>
+  <script type="module" src="src/home.js"></script>
+  <script src="src/loader.js"></script>
+  <script src="src/buttonEvents.js"></script>
+  <script type="module" src="src/controles.js"></script>
+  <script>
+    let lastTouch = 0;
+
+    document.querySelectorAll('#cima, #baixo, #esquerda, #direita').forEach(btn => {
+      btn.addEventListener('touchend', (e) => {
+        const now = new Date().getTime();
+        if (now - lastTouch <= 300) {
+          e.preventDefault(); // bloqueia o double-tap zoom
+        }
+        lastTouch = now;
+      });
+    });
+    
+    var sobre = document.getElementById("sobre");
+    var fecharSobre = document.getElementById("fechar-sobre");
+    var params = new URLSearchParams(window.location.search);
+    var selectedColor = params.get("color");
+    
+    document.addEventListener("DOMContentLoaded", function() {
+      var corDeFundo = localStorage.getItem("backgroundColor");
+      
+      if (corDeFundo) {
+        document.body.style.backgroundColor = corDeFundo;
+      }
+    });
+  </script>
+  </body>
+</html>
