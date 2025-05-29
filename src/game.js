@@ -123,7 +123,7 @@ window.onload = function () {
         
         
         //background tabuleiro
-        ctx.fillStyle = "#1c1c1c";
+        ctx.fillStyle = "#121212";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         canvas.style.opacity = 0.8;
@@ -145,8 +145,8 @@ window.onload = function () {
         }
 
         //linhas da grades
-        ctx.shadowColor = "#2b2b2b";
-        ctx.shadowBlur = 10;
+        ctx.strokeStyle = "#2b2b2b";
+        ctx.lineWidth = 1;
         for (var x = 0; x < canvas.width; x += tamanhoDaPeca) {
             ctx.beginPath();
             ctx.moveTo(x, 0);
@@ -164,7 +164,54 @@ window.onload = function () {
         //desenha a maça
         ctx.fillStyle = "#E74C3C";
         ctx.fillRect(macaX * tamanhoDaPeca, macaY * tamanhoDaPeca, tamanhoDaPeca, tamanhoDaPeca);
+        
+        let particulas = [];
+        
+        function hexToRgb(hex) {
+            hex = hex.replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return `${r}, ${g}, ${b}`;
+        }
+        
 
+        function explodirParticulas(x, y, cor) {
+            for (let i = 0; i < 30; i++) {
+                particulas.push({
+                    x: x,
+                    y: y,
+                    dx: (Math.random() - 0.5) * 6,
+                    dy: (Math.random() - 0.5) * 6,
+                    alpha: 1,
+                    size: Math.random() * 2 + 1,
+                    cor: cor,
+                    life: Math.random() * 40 + 60
+                });
+            }
+        }
+        
+        //desenha particulas da maça
+        function desenharParticulas() {
+            for (let i = particulas.length - 1; i >= 0; i--) {
+                const p = particulas[i];
+                ctx.shadowColor = p.cor;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                p.x += p.dx;
+                p.y += p.dy;
+                p.alpha -= 0.01;
+                p.life--;
+                
+                if (p.life <= 0 || p.alpha <= 0) {
+                    particulas.splice(i, 1);
+                }
+            }
+        }
+        
+        //cria efeito animacao poder
         function desenharAuraDaCabeca(cabeca, cor) {
             const centerX = (cabeca.x + 0.5) * tamanhoDaPeca;
             const centerY = (cabeca.y + 0.5) * tamanhoDaPeca;
@@ -177,7 +224,7 @@ window.onload = function () {
             ctx.fillStyle = cor + "33"; // transparência
             ctx.fill();
             
-            ctx.lineWidth = 1.2;
+            ctx.lineWidth = 0.1;
             ctx.strokeStyle = cor;
             ctx.stroke();
             ctx.restore();
@@ -296,7 +343,13 @@ window.onload = function () {
 
         //verifica colisao da cobra com a maça
         if (macaX == posX && macaY == posY) {
-
+            //efeito de explosao
+            explodirParticulas(
+                macaX * tamanhoDaPeca + tamanhoDaPeca / 2,
+                macaY * tamanhoDaPeca + tamanhoDaPeca / 2,
+                "#E74C3C"
+            );
+            
             //adiciona mais um gomo na cobrinha e atualiza a posiçao da maça
             tail++;
             posicaoMaca();
@@ -341,7 +394,7 @@ window.onload = function () {
                         if (poderTempo - i === 0) {
                             document.getElementById("tempo-poder").innerHTML = " ";
                         } else {
-                            document.getElementById("tempo-poder").innerHTML = poderTempo - i;
+                            document.getElementById("tempo-poder").innerHTML = `${poderTempo - i}`
                         }
                     }, 1000 * i);
                 }
@@ -353,7 +406,11 @@ window.onload = function () {
                 poderVisivel = true;
             }, 15000);
         }
+        desenharParticulas();
     };
     
-    movimenta = setInterval(meuGame, tempoVelocidade);
+    movimenta = setInterval(
+        meuGame, 
+        tempoVelocidade
+    );
 };
