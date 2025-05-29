@@ -69,11 +69,11 @@
   <script>
     let lastTouch = 0;
 
-    document.querySelectorAll('#cima, #baixo, #esquerda, #direita').forEach(btn => {
-      btn.addEventListener('touchend', (e) => {
+    document.querySelectorAll('#cima, #baixo, #esquerda, #direita, html, body').forEach(el => {
+      el.addEventListener('touchend', (e) => {
         const now = new Date().getTime();
         if (now - lastTouch <= 300) {
-          e.preventDefault(); // bloqueia o double-tap zoom
+          e.preventDefault(); // evita o double-tap zoom
         }
         lastTouch = now;
       });
