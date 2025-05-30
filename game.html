@@ -68,8 +68,7 @@
   <script type="module" src="src/controles.js"></script>
   <script>
       let lastTouch = 0;
-    
-      // Impede o duplo clique/touch rápido em mobile de causar zoom
+  
       document.querySelectorAll('#cima, #baixo, #esquerda, #direita, html, body').forEach(el => {
         el.addEventListener('touchstart', (e) => {
           const now = new Date().getTime();
@@ -79,62 +78,19 @@
           lastTouch = now;
         });
       });
-    
-      // Seletores principais
-      const sobre = document.getElementById("sobre");
-      const fecharSobre = document.getElementById("fechar-sobre");
-    
-      // Aplicar cor salva
-      document.addEventListener("DOMContentLoaded", function () {
-        const corDeFundo = localStorage.getItem("backgroundColor");
+      
+      var sobre = document.getElementById("sobre");
+      var fecharSobre = document.getElementById("fechar-sobre");
+      var params = new URLSearchParams(window.location.search);
+      var selectedColor = params.get("color");
+      
+      document.addEventListener("DOMContentLoaded", function() {
+        var corDeFundo = localStorage.getItem("backgroundColor");
+        
         if (corDeFundo) {
           document.body.style.backgroundColor = corDeFundo;
         }
       });
-    
-      // Ao clicar no botão fechar do banner
-      fecharSobre.addEventListener("click", function () {
-        const elem = document.documentElement;
-    
-        // Tenta fullscreen com promessa
-        if (elem.requestFullscreen) {
-          elem.requestFullscreen().then(() => {
-            iniciarJogo();
-          }).catch((err) => {
-            console.warn("Erro ao tentar fullscreen:", err);
-            iniciarJogo();
-          });
-        } else {
-          iniciarJogo();
-        }
-      });
-    
-      //esconde banner e começa a lógica
-      function iniciarJogo() {
-        sobre.style.display = "none";
-        movimenta = setInterval(meuGame, tempoVelocidade);
-      }
-    
-      // Ajusta o viewport para evitar zoom indesejado em telas pequenas
-      (function () {
-        const largura = window.innerWidth;
-        const meta = document.querySelector('meta[name=viewport]');
-        if (meta) {
-          meta.parentNode.removeChild(meta);
-        }
-    
-        const novaMeta = document.createElement('meta');
-        novaMeta.name = 'viewport';
-    
-        // Se for mobile muito pequeno, força uma largura mínima
-        if (largura <= 380) {
-          novaMeta.content = 'width=420, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-        } else {
-          novaMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-        }
-    
-        document.head.appendChild(novaMeta);
-      })();
     </script>
   </body>
 </html>
