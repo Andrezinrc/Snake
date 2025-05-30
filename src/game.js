@@ -59,23 +59,19 @@ window.onload = function () {
         document.getElementById("tempo").textContent = tempo;
     }
     
-    document.addEventListener("DOMContentLoaded", () => {
-        contagem = setInterval(contarTempo, 200);
-    });
-    
-    //botao que fecha a explicaçao
-    fecharSobre.addEventListener("click", () => {
-        const computedStyle = window.getComputedStyle(sobre);
-        
-        if (computedStyle.display === "block") {
-            contagem = setInterval(contarTempo, 200);
-            sobre.style.display = "none";
+    function iniciarJogoAutomaticamente(){
+        if (typeof container === "undefined") {
+        const container = document.getElementById("container");
             container.style.display = "block";
         } else {
-            sobre.style.display = "block";
-            container.style.display = "none";
+        container.style.display = "block";
         }
-    });
+        contagem = setInterval(contarTempo, 200);
+        console.log("Iniciado automático");
+    }
+    
+    //inicia automaticamente
+    iniciarJogoAutomaticamente();
 
     // botão pausar
     pausar.addEventListener("click", () => {
@@ -343,13 +339,12 @@ window.onload = function () {
 
         //verifica colisao da cobra com a maça
         if (macaX == posX && macaY == posY) {
-            //efeito de explosao
+            // Quando comer a maçã
             explodirParticulas(
                 macaX * tamanhoDaPeca + tamanhoDaPeca / 2,
                 macaY * tamanhoDaPeca + tamanhoDaPeca / 2,
                 "#E74C3C"
             );
-            
             //adiciona mais um gomo na cobrinha e atualiza a posiçao da maça
             tail++;
             posicaoMaca();

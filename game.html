@@ -8,7 +8,6 @@
   <title>Jogo da cobrinha</title>
 </head>
 <body>
-
   <div class="container">
     <canvas id="gameCanvas"></canvas>
 
@@ -50,47 +49,24 @@
     <!--Animacao do poder-->
     <div class="pisca-pisca"></div>
   </div>
-  
-  <!--explicando o jogo-->
-  <div class="sobre" id="sobre">
-    <div class="fechar-sobre" id="fechar-sobre">
-      <img src="assets/img/fechar.png" loading="lazy">
-    </div>
-    <h3>
-       Neste jogo da Cobrinha, colete o quadrado vermelho para ganhar pontos e aumentar seu recorde. O quadrado Roxo é um poder especial que te deixa imune de colisão por 7 segundos. Desvie de você mesmo e tente bater seu maior recorde.
-    </h3>
-  </div>
-  
-  <script type="module" src="src/game.js"></script>
-  <script type="module" src="src/home.js"></script>
+
   <script src="src/loader.js"></script>
   <script src="src/buttonEvents.js"></script>
   <script type="module" src="src/controles.js"></script>
+  <script type="module" src="src/game.js"></script>
+  <script type="module" src="src/home.js"></script>
   <script>
-      let lastTouch = 0;
+  let lastTouch = 0;
   
-      document.querySelectorAll('#cima, #baixo, #esquerda, #direita, html, body').forEach(el => {
-        el.addEventListener('touchstart', (e) => {
-          const now = new Date().getTime();
-          if (now - lastTouch <= 300) {
-            e.preventDefault();
-          }
-          lastTouch = now;
-        });
-      });
-      
-      var sobre = document.getElementById("sobre");
-      var fecharSobre = document.getElementById("fechar-sobre");
-      var params = new URLSearchParams(window.location.search);
-      var selectedColor = params.get("color");
-      
-      document.addEventListener("DOMContentLoaded", function() {
-        var corDeFundo = localStorage.getItem("backgroundColor");
-        
-        if (corDeFundo) {
-          document.body.style.backgroundColor = corDeFundo;
-        }
-      });
-    </script>
+  document.querySelectorAll('#cima, #baixo, #esquerda, #direita, html, body').forEach(el => {
+    el.addEventListener('touchstart', (e) => {
+      const now = new Date().getTime();
+      if (now - lastTouch <= 300) {
+        e.preventDefault();
+      }
+      lastTouch = now;
+    });
+  });
+</script>
   </body>
 </html>
