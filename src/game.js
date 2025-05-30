@@ -3,7 +3,6 @@ import { controlePc, controleMobile } from "./controles.js";
 window.onload = function () {
     let canvas = document.querySelector("#gameCanvas");
     let ctx = canvas.getContext("2d");
-    let piscaPisca = document.querySelector(".pisca-pisca");
     let velocidade = 1;
     let posX = 5;
     let posY = 5;
@@ -26,6 +25,7 @@ window.onload = function () {
     let tempoVelocidade = 100;
     let movimenta = setInterval(meuGame, tempoVelocidade);
     var contagem = null;
+    let particulas = [];
     let mensagem_perdeu = document.getElementById("voce-perdeu");
     let jogarNovamente = document.getElementById("jogar-novamente");
     let botoes = document.getElementById("botoes");
@@ -36,18 +36,33 @@ window.onload = function () {
     let sair = document.getElementById("sair")
     let tempo = 0;
     let container = document.querySelector(".container");
+    let ultimoFrame = 0;
+    let jogoPausado = false;
     
+    //estado dos controle
     const estado = {
         velX: velX,
         velY: velY,
         velocidade: velocidade
     };
-
-    document.addEventListener("keydown", (event) => controlePc(event, estado));
-    controleMobile(estado);
-
-    piscaPisca.style.left = "150px";
-    piscaPisca.style.top = "80px";
+    
+    //incia jogo automaticamente
+    if (typeof container === "undefined") {
+        const container = document.getElementById("container");
+        container.style.display = "block";
+    } else {
+        container.style.display = "block";
+    }
+    contagem = setInterval(contarTempo, 200);
+    console.log("Iniciado automático");
+    
+    
+    //funcao para configurar controles
+    function configurarControles() {
+        document.addEventListener("keydown", (event) => controlePc(event, estado));
+        controleMobile(estado);
+    }
+    
     //pontucaco
     function atualizarPontuacao() {
         document.getElementById("pontuacao").textContent = "Pontuação: " + pontuacao;
@@ -55,26 +70,14 @@ window.onload = function () {
 
     //tempo do jogo
     function contarTempo() {
+        if (contagem !== null) clearInterval(contagem);
+        contagem = setInterval(contarTempo, 200)
         tempo += 10;
         document.getElementById("tempo").textContent = tempo;
     }
-    
-    function iniciarJogoAutomaticamente(){
-        if (typeof container === "undefined") {
-        const container = document.getElementById("container");
-            container.style.display = "block";
-        } else {
-        container.style.display = "block";
-        }
-        contagem = setInterval(contarTempo, 200);
-        console.log("Iniciado automático");
-    }
-    
-    //inicia automaticamente
-    iniciarJogoAutomaticamente();
 
-    // botão pausar
-    pausar.addEventListener("click", () => {
+    function pausarJogo(){
+        jogoPausado = true;
         velXAnterior = estado.velX;
         velYAnterior = estado.velY;
         clearInterval(movimenta);
@@ -84,12 +87,21 @@ window.onload = function () {
         sair.style.display = "block";
         pausar.style.display = "none";
         mensagem_perdeu.style.display = "none";
-    });
+    }
     
-    // botão continuar
-    continuar.addEventListener("click", () => {
+    function continuarJogo(){
+        if (!jogoPausado) return;
+        jogoPausado = false;
+        
+        ultimoFrame = performance.now();
+        
         estado.velX = velXAnterior;
         estado.velY = velYAnterior;
+        
+        contagem = setInterval(contarTempo, 200);
+        
+        console.log('velXAnterior:', velXAnterior, 'velYAnterior:', velYAnterior);
+        
         movimenta = setInterval(meuGame, tempoVelocidade);
         contagem = setInterval(contarTempo, 200);
         botoes.style.display = "block";
@@ -101,68 +113,82 @@ window.onload = function () {
         jogarNovamente.style.display = "none";
         voltar.style.display = "none";
         mensagem_perdeu.style.display = "none";
-        sobre.style.display = "none";
+    }
+
+    //botao pausar
+    pausar.addEventListener("click", () => {
+       pausarJogo();
+    });
+    
+    // botão continuar
+    continuar.addEventListener("click", () => {
+       continuarJogo();
     });
     
     // botão jogar novamente
     jogarNovamente.addEventListener("click", () => {
-        Carregar();
+       Carregar();
     });
     
     //funcao do jogo
     var meuGame = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        mensagem_perdeu.style.display = "none";
+        if (jogoPausado) return;
         
-        canvas.width = 350;
-        canvas.height = 350;
+       console.log("Game rodando", estado.velX, estado.velY);
         
+        function desenhaTabuleiro() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            mensagem_perdeu.style.display = "none";
+            
+            canvas.width = 350;
+            canvas.height = 350;
+            
+            // background tabuleiro
+            ctx.fillStyle = "#121212";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            canvas.style.opacity = 0.8;
+            
+            // movimentacao e teletransporte
+            posX += estado.velX;
+            posY += estado.velY;
+            
+            if (posX < 0) posX = quantidadeDePeca - 1;
+            if (posX > quantidadeDePeca - 1) posX = 0;
+            if (posY < 0) posY = quantidadeDePeca - 1;
+            if (posY > quantidadeDePeca - 1) posY = 0;
+        }
         
-        //background tabuleiro
-        ctx.fillStyle = "#121212";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // desenha grade do tabuleiro
+        function desenhaGrade() {
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = "transparent";
+            
+            // Linhas da grade
+            ctx.strokeStyle = "#2b2b2b";
+            ctx.lineWidth = 1;
+            
+            for (var x = 0; x < canvas.width; x += tamanhoDaPeca) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (var y = 0; y < canvas.height; y += tamanhoDaPeca) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
         
-        canvas.style.opacity = 0.8;
-
-        posX += estado.velX;
-        posY += estado.velY;
-
-        if (posX < 0) {
-            posX = quantidadeDePeca - 1;
-        }
-        if (posX > quantidadeDePeca - 1) {
-            posX = 0;
-        }
-        if (posY < 0) {
-            posY = quantidadeDePeca - 1;
-        }
-        if (posY > quantidadeDePeca - 1) {
-            posY = 0;
-        }
-
-        //linhas da grades
-        ctx.strokeStyle = "#2b2b2b";
-        ctx.lineWidth = 1;
-        for (var x = 0; x < canvas.width; x += tamanhoDaPeca) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, canvas.height);
-            ctx.stroke();
-        }
-
-        for (var y = 0; y < canvas.height; y += tamanhoDaPeca) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(canvas.width, y);
-            ctx.stroke();
-        }
-
         //desenha a maça
-        ctx.fillStyle = "#E74C3C";
-        ctx.fillRect(macaX * tamanhoDaPeca, macaY * tamanhoDaPeca, tamanhoDaPeca, tamanhoDaPeca);
+        function desenhaMaca(){
+            ctx.fillStyle = "#E74C3C";
+            ctx.fillRect(macaX * tamanhoDaPeca, macaY * tamanhoDaPeca, tamanhoDaPeca, tamanhoDaPeca);
+        }
         
-        let particulas = [];
-        
+        //gera a cor rbg das partículas a partir de um código hexadecimal
         function hexToRgb(hex) {
             hex = hex.replace('#', '');
             const r = parseInt(hex.substring(0, 2), 16);
@@ -171,7 +197,7 @@ window.onload = function () {
             return `${r}, ${g}, ${b}`;
         }
         
-
+        //particulas de efeito de colisao
         function explodirParticulas(x, y, cor) {
             for (let i = 0; i < 30; i++) {
                 particulas.push({
@@ -194,7 +220,7 @@ window.onload = function () {
                 ctx.shadowColor = p.cor;
                 ctx.shadowBlur = 10;
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, 1, 0, Math.PI * 2);
                 ctx.fill();
                 p.x += p.dx;
                 p.y += p.dy;
@@ -248,78 +274,97 @@ window.onload = function () {
                 ctx.restore();
             }
         }
-        desenharPoder();
-
-        //ativa efeito do poder
-        if (temPoder) {
-            if (cobraVerde) {
-                ctx.fillStyle = "#6C5CE7";
-            } else {
-                ctx.fillStyle = "#00D26A";
-            }
-            cobraVerde = !cobraVerde;
-        } else {
-            ctx.fillStyle = "#00D26A";
-        }
-
         
         // desenha a cobrinha
-        for (var i = 0; i < rastro.length; i++) {
-            ctx.stroke();
-            ctx.fillRect(rastro[i].x * tamanhoDaPeca, rastro[i].y * tamanhoDaPeca, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
-            
-            //verifica colisao da cobra com ela mesma
-            if (!temPoder && rastro[i].x == posX && rastro[i].y == posY) {
-                estado.velX = 0;
-                estado.velY = 0;
-                tail = 5;
-                mensagem_perdeu.style.display = "block";
-                pausar.style.display = "none";
-                botoes.style.display = "none";
-                jogarNovamente.style.display = "block";
-                voltar.style.display = "block";
-                localStorage.setItem("pontuacao", pontuacao);
-                clearInterval(contagem);
+        function desenhaCobra(){
+            for (var i = 0; i < rastro.length; i++) {
+    
+                const alpha = (i + 1) / rastro.length;
+                ctx.fillStyle = `rgba(0, 210, 106, ${alpha})`;
+                
+                //ativa efeito do poder
+                if (temPoder) {
+                    ctx.fillStyle = "#00D26A";
+                    
+                    if (cobraVerde) {
+                        ctx.fillStyle = "#6C5CE7";
+                    } else {
+                        ctx.fillStyle = "#00D26A";
+                    }
+                    cobraVerde = !cobraVerde;
+                    
+                } else {
+                    const alpha = (i + 1) / rastro.length;
+                    ctx.shadowColor = "transparent";
+                }
+                
+                ctx.fillRect(
+                    rastro[i].x * tamanhoDaPeca,
+                    rastro[i].y * tamanhoDaPeca,
+                    tamanhoDaPeca - 1,
+                    tamanhoDaPeca - 1
+                )
+                ctx.stroke();
+                ctx.fillRect(rastro[i].x * tamanhoDaPeca, rastro[i].y * tamanhoDaPeca, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
+                
+                //verifica colisao da cobra com ela mesma
+                if (!temPoder && rastro[i].x == posX && rastro[i].y == posY) {
+                    estado.velX = 0;
+                    estado.velY = 0;
+                    tail = 5;
+                    mensagem_perdeu.style.display = "block";
+                    pausar.style.display = "none";
+                    botoes.style.display = "none";
+                    jogarNovamente.style.display = "block";
+                    voltar.style.display = "block";
+                    localStorage.setItem("pontuacao", pontuacao);
+                    clearInterval(contagem);
+                }
             }
         }
         
         // Desenha os olhos
-        if (rastro.length > 0) {
-            const cabeca = rastro[rastro.length - 1];
-            // Aura ao redor da cabeça
-            if (temPoder) {
-                const corAura = cobraVerde ? "#6C5CE7" : "#00D26A";
-                desenharAuraDaCabeca(cabeca, corAura);
+        function desenhaOlhos(){
+            if (rastro.length > 0) {
+                const cabeca = rastro[rastro.length - 1];
+                // Aura ao redor da cabeça
+                if (temPoder) {
+                    const corAura = cobraVerde ? "#6C5CE7" : "#00D26A";
+                    desenharAuraDaCabeca(cabeca, corAura);
+                }
+                
+                const corOriginal = ctx.fillStyle;
+                
+                // Desenha os olhos
+                ctx.fillStyle = 'black';
+                ctx.fillRect(
+                    (cabeca.x + 0.25) * tamanhoDaPeca,
+                    (cabeca.y + 0.25) * tamanhoDaPeca,
+                    tamanhoDaPeca / 4,
+                    tamanhoDaPeca / 4
+                ); // Olho esquerdo
+                
+                ctx.fillRect(
+                    (cabeca.x + 0.75) * tamanhoDaPeca,
+                    (cabeca.y + 0.25) * tamanhoDaPeca,
+                    tamanhoDaPeca / 4,
+                    tamanhoDaPeca / 4
+                ); // Olho direito
+                
+                ctx.fillStyle = corOriginal;
             }
-
-            const corOriginal = ctx.fillStyle;
-            
-            // Desenha os olhos
-            ctx.fillStyle = 'black';
-            ctx.fillRect(
-                (cabeca.x + 0.25) * tamanhoDaPeca,
-                (cabeca.y + 0.25) * tamanhoDaPeca,
-                tamanhoDaPeca / 4,
-                tamanhoDaPeca / 4
-            ); // Olho esquerdo
-            
-            ctx.fillRect(
-                (cabeca.x + 0.75) * tamanhoDaPeca,
-                (cabeca.y + 0.25) * tamanhoDaPeca,
-                tamanhoDaPeca / 4,
-                tamanhoDaPeca / 4
-            ); // Olho direito
-            
-            ctx.fillStyle = corOriginal;
         }
         
-        rastro.push({
-            x: posX,
-            y: posY
-        });
-        
-        while (rastro.length > tail) {
-            rastro.shift();
+        //desenha rastro
+        function desenhaRastro(){
+            rastro.push({
+                x: posX,
+                y: posY
+            });
+            
+            while (rastro.length > tail) {
+                rastro.shift();
+            }
         }
         
         //funcao para  atualizar a nova posiçao do poder
@@ -338,74 +383,96 @@ window.onload = function () {
         }
 
         //verifica colisao da cobra com a maça
-        if (macaX == posX && macaY == posY) {
-            // Quando comer a maçã
-            explodirParticulas(
-                macaX * tamanhoDaPeca + tamanhoDaPeca / 2,
-                macaY * tamanhoDaPeca + tamanhoDaPeca / 2,
-                "#E74C3C"
-            );
-            //adiciona mais um gomo na cobrinha e atualiza a posiçao da maça
-            tail++;
-            posicaoMaca();
-
-            pontuacao += 10;
-
-            if (pontuacao % 100 === 0) {
-                tempoVelocidade -= 10;
-
-                // Limita para não ficar rápido demais -> NAO TOCAR NISSO
-                if (tempoVelocidade < 50) {
-                    tempoVelocidade = 50;
-                }
-
-                // Atualiza o intervalo do jogo
-                clearInterval(movimenta);
-                movimenta = setInterval(meuGame, tempoVelocidade);
-
-                console.log("Atualizou velocidade: ", tempoVelocidade);
-            }
-            document.getElementById("pontuacao").innerHTML = "Pontuação: " + pontuacao;
-            atualizarPontuacao();
-        }
-
-        //verifica colisao da cobra com o poder
-        if (poderX == posX && poderY == posY) {
-            poderVisivel = false;
-            //ativa e remove poder
-            if (!temPoder) {
-                temPoder = true;
-                
-                setTimeout(function () {
-                    temPoder = false;
-                }, 7000);
-
-
-                //mostr o tempo  restante do poder
-                var poderTempo = 7;
-
-                for (let i = 0; i <= poderTempo; i++) {
-                    setTimeout(() => {
-                        if (poderTempo - i === 0) {
-                            document.getElementById("tempo-poder").innerHTML = " ";
-                        } else {
-                            document.getElementById("tempo-poder").innerHTML = `${poderTempo - i}`
-                        }
-                    }, 1000 * i);
-                }
-            } 
-
-            // espera para atualizar a nova posiçao da maça
-            setTimeout(() => {
-                posicaoPoder();
-                poderVisivel = true;
-            }, 15000);
-        }
-        desenharParticulas();
-    };
+        function verificaColisaoCobraEMaca(){
+            if (macaX == posX && macaY == posY) {
+                // Quando comer a maçã
+                explodirParticulas(
+                    macaX * tamanhoDaPeca + tamanhoDaPeca / 2,
+                    macaY * tamanhoDaPeca + tamanhoDaPeca / 2,
+                    "#E74C3C"
+                );
+                //adiciona mais um gomo na cobrinha e atualiza a posiçao da maça
+                tail++;
+                posicaoMaca();
     
+                pontuacao += 10;
+    
+                if (pontuacao % 100 === 0) {
+                    tempoVelocidade -= 10;
+    
+                    // Limita para não ficar rápido demais -> NAO TOCAR NISSO
+                    if (tempoVelocidade < 50) {
+                        tempoVelocidade = 50;
+                    }
+    
+                    // Atualiza o intervalo do jogo
+                    clearInterval(movimenta);
+                    movimenta = setInterval(meuGame, tempoVelocidade);
+    
+                    console.log("Atualizou velocidade: ", tempoVelocidade);
+                }
+                document.getElementById("pontuacao").innerHTML = "Pontuação: " + pontuacao;
+                atualizarPontuacao();
+            }
+        }
+        
+        //verifica colisao da cobra com o poder
+        function verificaColisaoCobraEPoder(){
+            if (poderX == posX && poderY == posY) {
+                poderVisivel = false;
+                //ativa e remove poder
+                if (!temPoder) {
+                    temPoder = true;
+                    
+                    setTimeout(function() {
+                        temPoder = false;
+                    }, 10000);
+                    
+                    
+                    //mostr o tempo  restante do poder
+                    var poderTempo = 10;
+                    
+                    for (let i = 0; i <= poderTempo; i++) {
+                        setTimeout(() => {
+                            if (poderTempo - i === 0) {
+                                document.getElementById("tempo-poder").innerHTML = " ";
+                            } else {
+                                document.getElementById("tempo-poder").innerHTML = `${poderTempo - i}`
+                            }
+                        }, 1000 * i);
+                    }
+                }
+                
+                // espera para atualizar a nova posiçao da maça
+                setTimeout(() => {
+                    posicaoPoder();
+                    poderVisivel = true;
+                }, 15000);
+            }
+        }
+        
+        // === RENDERIZAÇÃO ===
+        desenhaTabuleiro();
+        desenhaGrade();
+        desenhaCobra();
+        desenhaOlhos();
+        desenhaRastro();
+        desenhaMaca();
+        desenharParticulas();
+        desenharPoder();
+        
+        // === DETECÇÃO DE COLISÕES ===
+        verificaColisaoCobraEMaca();
+        verificaColisaoCobraEPoder();
+        
+        // === CONFIGURACOES ===
+        configurarControles();
+    };
+
+    //MOTOR
     movimenta = setInterval(
-        meuGame, 
+        meuGame,
         tempoVelocidade
     );
 };
+
