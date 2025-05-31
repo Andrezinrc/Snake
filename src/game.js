@@ -134,7 +134,7 @@ window.onload = function () {
     var meuGame = () => {
         if (jogoPausado) return;
         
-       console.log("Game rodando", estado.velX, estado.velY);
+        console.log("Game rodando", estado.velX, estado.velY);
         
         function desenhaTabuleiro() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -237,7 +237,7 @@ window.onload = function () {
         function desenharAuraDaCabeca(cabeca, cor) {
             const centerX = (cabeca.x + 0.5) * tamanhoDaPeca;
             const centerY = (cabeca.y + 0.5) * tamanhoDaPeca;
-            const raio = tamanhoDaPeca * 1.5;
+            const raio = tamanhoDaPeca * 2.2;
             
             ctx.save();
             ctx.beginPath();
@@ -381,41 +381,66 @@ window.onload = function () {
             macaX = Math.floor(Math.random() * quantidadeDePeca);
             macaY = Math.floor(Math.random() * quantidadeDePeca);
         }
-
-        //verifica colisao da cobra com a maça
-        function verificaColisaoCobraEMaca(){
-            if (macaX == posX && macaY == posY) {
-                // Quando comer a maçã
-                explodirParticulas(
-                    macaX * tamanhoDaPeca + tamanhoDaPeca / 2,
-                    macaY * tamanhoDaPeca + tamanhoDaPeca / 2,
-                    "#E74C3C"
-                );
-                //adiciona mais um gomo na cobrinha e atualiza a posiçao da maça
+        
+        // Verifica se um círculo colidiu com um retângulo
+        function colisaoCirculoRetangulo(cx, cy, raio, rx, ry, largura, altura) {
+            const testeX = Math.max(rx, Math.min(cx, rx + largura));
+            const testeY = Math.max(ry, Math.min(cy, ry + altura));
+            const distancia = Math.hypot(cx - testeX, cy - testeY);
+            
+            // Retorna true se a distância for menor que o raio
+            return distancia < raio;
+        }
+        
+        //
+        function verificaColisaoCobraOuAuraComMaca() {
+            //colisao cobra e maça sem poder
+            const colidiuComCobra = (macaX === posX && macaY === posY);
+            
+            let colidiuComAura = false;
+            if (temPoder) {
+                const cx = (posX + 0.5) * tamanhoDaPeca;
+                const cy = (posY + 0.5) * tamanhoDaPeca;
+                const raioAura = tamanhoDaPeca * 2.2;
+                
+                const rx = macaX * tamanhoDaPeca;
+                const ry = macaY * tamanhoDaPeca;
+                
+                if (colisaoCirculoRetangulo(cx, cy, raioAura, rx, ry, tamanhoDaPeca, tamanhoDaPeca)) {
+                    colidiuComAura = true;
+                }
+            }
+            
+            //verifica colisao cobrinha normal e cobrinha com aura
+            if (colidiuComCobra || colidiuComAura) {
+                //aplica colisao especial
+                if(colidiuComAura){
+                    explodirParticulas(
+                        macaX * tamanhoDaPeca + tamanhoDaPeca / 2,
+                        macaY * tamanhoDaPeca + tamanhoDaPeca / 2,
+                        "#E74C3C"
+                    );
+                }
                 tail++;
                 posicaoMaca();
-    
+                
                 pontuacao += 10;
-    
+                
                 if (pontuacao % 100 === 0) {
                     tempoVelocidade -= 10;
-    
-                    // Limita para não ficar rápido demais -> NAO TOCAR NISSO
-                    if (tempoVelocidade < 50) {
-                        tempoVelocidade = 50;
-                    }
-    
-                    // Atualiza o intervalo do jogo
+                    if (tempoVelocidade < 50) tempoVelocidade = 50;
+                    
                     clearInterval(movimenta);
                     movimenta = setInterval(meuGame, tempoVelocidade);
-    
+                    
                     console.log("Atualizou velocidade: ", tempoVelocidade);
                 }
+                
                 document.getElementById("pontuacao").innerHTML = "Pontuação: " + pontuacao;
                 atualizarPontuacao();
             }
         }
-        
+    
         //verifica colisao da cobra com o poder
         function verificaColisaoCobraEPoder(){
             if (poderX == posX && poderY == posY) {
@@ -426,11 +451,11 @@ window.onload = function () {
                     
                     setTimeout(function() {
                         temPoder = false;
-                    }, 10000);
+                    }, 7000);
                     
                     
                     //mostr o tempo  restante do poder
-                    var poderTempo = 10;
+                    var poderTempo = 7;
                     
                     for (let i = 0; i <= poderTempo; i++) {
                         setTimeout(() => {
@@ -462,17 +487,16 @@ window.onload = function () {
         desenharPoder();
         
         // === DETECÇÃO DE COLISÕES ===
-        verificaColisaoCobraEMaca();
+        verificaColisaoCobraOuAuraComMaca();
         verificaColisaoCobraEPoder();
         
         // === CONFIGURACOES ===
         configurarControles();
     };
 
-    //MOTOR
+    //MOTOR - nao é o ideal, mas funciona!
     movimenta = setInterval(
         meuGame,
         tempoVelocidade
     );
 };
-
