@@ -23,9 +23,7 @@
     </div>
 
     <!--Botao Jogar novamente-->
-    <div id="jogar-novamente" onclick="Carregar()">
-      <h1>Jogar Novamente</h1>
-    </div>
+    <button id="jogar-novamente" onclick="Carregar()">Tentar Novamente</button>
     <!--Botao voltar-->
      <div class="botao-voltar" id="voltar" onclick="Voltar">
       <a href="index.html">Voltar</a>
@@ -33,9 +31,7 @@
     <!--Botao pausar-->
     <div class="botao-pause" id="pausar"></div>
     <!--Botao continuar-->
-    <div id="continuar" id="continuar">
-      <h1>Continuar</h1>
-    </div>
+    <button id="continuar" id="continuar">Continuar</button>
     <!--Botao sair-->
      <div class="sair" id="sair">
       <a href="https://www.google.com.br">Sair</a>
@@ -46,27 +42,13 @@
     <p id="tempo" class="tempo">0</p>
     <!--Tempo do poder-->
     <p id="tempo-poder" class="tempo-poder"></p>
-    <!--Animacao do poder-->
-    <div class="pisca-pisca"></div>
   </div>
 
   <script src="src/loader.js"></script>
   <script src="src/buttonEvents.js"></script>
   <script type="module" src="src/controles.js"></script>
+  <script src="src/preventDoubleTap.js"></script>
   <script type="module" src="src/game.js"></script>
   <script type="module" src="src/home.js"></script>
-  <script>
-  let lastTouch = 0;
-  
-  document.querySelectorAll('#cima, #baixo, #esquerda, #direita, html, body').forEach(el => {
-    el.addEventListener('touchstart', (e) => {
-      const now = new Date().getTime();
-      if (now - lastTouch <= 300) {
-        e.preventDefault();
-      }
-      lastTouch = now;
-    });
-  });
-</script>
   </body>
 </html>
