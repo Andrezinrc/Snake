@@ -355,11 +355,8 @@ window.onload = function () {
         
         // desenha a cobrinha
         function desenhaCobra(){
-            for (var i = 0; i < rastro.length; i++) {
-    
-                const alpha = (i + 1) / rastro.length;
-                ctx.fillStyle = `rgba(0, 210, 106, ${alpha})`;
-                
+            for (var i = 0; i < rastro.length; i++){
+
                 //ativa efeito do poder
                 if (temPoder) {
                     ctx.fillStyle = "#00D26A";
@@ -371,19 +368,24 @@ window.onload = function () {
                     }
                     cobraVerde = !cobraVerde;
                     
-                } else {
-                    const alpha = (i + 1) / rastro.length;
-                    ctx.shadowColor = "transparent";
                 }
+
+                const x = rastro[i].x * tamanhoDaPeca;
+                const y = rastro[i].y * tamanhoDaPeca;
+
+                ctx.fillStyle = "#00ff88";
+                ctx.fillRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
+            
+                ctx.strokeStyle = "#003322";
+                ctx.strokeRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
                 
-                ctx.fillRect(
-                    rastro[i].x * tamanhoDaPeca,
-                    rastro[i].y * tamanhoDaPeca,
-                    tamanhoDaPeca - 1,
-                    tamanhoDaPeca - 1
-                )
-                ctx.stroke();
-                ctx.fillRect(rastro[i].x * tamanhoDaPeca, rastro[i].y * tamanhoDaPeca, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
+                //binario estilo Matrix
+                if (i < rastro.length - 1) {
+                    ctx.fillStyle = "black";
+                    ctx.font = "11px monospace";
+                    const bit = Math.random() > 0.5 ? "1" : "0";
+                    ctx.fillText(bit, x + 3, y + 8);
+                }
                 
                 //verifica colisao da cobra com ela mesma
                 if (!temPoder && rastro[i].x == pos.x && rastro[i].y == pos.y) {
