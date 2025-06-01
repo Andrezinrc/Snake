@@ -130,7 +130,7 @@ window.onload = function () {
             this.jogarNovamente.style.display = "block";
             this.voltar.style.display = "block";
             
-            if(recordeSalvo < 1){
+            if(this.recordeSalvo < 1){
                 document.getElementById("mensagem-final").textContent = "Primeiro passo rumo ao topo!";
             } else if (this.pontuacao > this.recordeSalvo) {
                 localStorage.setItem("recorde", this.pontuacao);
