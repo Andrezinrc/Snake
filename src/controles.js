@@ -1,21 +1,21 @@
 //controle pc
-export function controlePc(event, estado) {
+export function controlePc(event, gameState) {
   switch (event.keyCode) {
     case 37:
-      estado.velX = -estado.velocidade;
-      estado.velY = 0;
+      gameState.vel.x = -gameState.velocidade;
+      gameState.vel.y = 0;
       break;
     case 38:
-      estado.velY = -estado.velocidade;
-      estado.velX = 0;
+      gameState.vel.y  = -gameState.velocidade;
+      gameState.vel.x = 0;
       break;
     case 39:
-      estado.velX = estado.velocidade;
-      estado.velY = 0;
+      gameState.vel.x = gameState.velocidade;
+      gameState.vel.y = 0;
       break;
     case 40:
-      estado.velY = estado.velocidade;
-      estado.velX = 0;
+      gameState.vel.y = gameState.velocidade;
+      gameState.velX = 0;
       break;
     default:
       break;
@@ -23,24 +23,28 @@ export function controlePc(event, estado) {
 }
 
 //controle mobile
-export function controleMobile(estado) {
+export function controleMobile(gameState) {
   document.querySelector("#cima").addEventListener('touchstart', () => {
-    estado.velY = -estado.velocidade;
-    estado.velX = 0;
+    gameState.vel.y = -gameState.velocidade;
+    gameState.vel.x = 0;
+    navigator.vibrate?.(30);
   }, false);
   
   document.querySelector("#baixo").addEventListener('touchstart', () => {
-    estado.velY = estado.velocidade;
-    estado.velX = 0;
+    gameState.vel.y = gameState.velocidade;
+    gameState.vel.x = 0;
+    navigator.vibrate?.(30);
   }, false);
   
   document.querySelector("#esquerda").addEventListener('touchstart', () => {
-    estado.velX = -estado.velocidade;
-    estado.velY = 0;
+    gameState.vel.x = -gameState.velocidade;
+    gameState.vel.y = 0;
+    navigator.vibrate?.(30);
   }, false);
   
   document.querySelector("#direita").addEventListener('touchstart', () => {
-    estado.velX = estado.velocidade;
-    estado.velY = 0;
+    gameState.vel.x = gameState.velocidade;
+    gameState.vel.y = 0;
+    navigator.vibrate?.(30);
   }, false);
 }

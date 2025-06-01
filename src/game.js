@@ -1,50 +1,123 @@
 import { controlePc, controleMobile } from "./controles.js";
 
 window.onload = function () {
-    let canvas = document.querySelector("#gameCanvas");
-    let ctx = canvas.getContext("2d");
-    let velocidade = 1;
-    let posX = 5;
-    let posY = 5;
-    let velX = velocidade;
-    let velY = 0;
-    let macaX = 10;
-    let macaY = 10;
-    let poderX = 20;
-    let poderY = 20;
-    let velXAnterior;
-    let velYAnterior;
-    let tamanhoDaPeca = 10;
-    let quantidadeDePeca = 35;
-    let peca = 5;
-    let rastro = [];
-    let tail = 5;
-    let temPoder = false;
-    let poderVisivel = true;
-    let pontuacao = 0;
-    let tempoVelocidade = 100;
-    let movimenta = setInterval(meuGame, tempoVelocidade);
-    var contagem = null;
-    let particulas = [];
-    let mensagem_perdeu = document.getElementById("voce-perdeu");
-    let jogarNovamente = document.getElementById("jogar-novamente");
-    let botoes = document.getElementById("botoes");
-    let voltar = document.getElementById("voltar");
-    let cobraVerde = true;
-    let pausar = document.getElementById("pausar");
-    let continuar = document.getElementById("continuar");
-    let sair = document.getElementById("sair")
-    let tempo = 0;
-    let container = document.querySelector(".container");
-    let ultimoFrame = 0;
-    let jogoPausado = false;
     
-    //estado dos controle
-    const estado = {
-        velX: velX,
-        velY: velY,
-        velocidade: velocidade
+    const mensagem_perdeu = document.getElementById("voce-perdeu");
+    const jogarNovamente = document.getElementById("jogar-novamente");
+    const botoes = document.getElementById("botoes");
+    const voltar = document.getElementById("voltar");
+    const pausar = document.getElementById("pausar");
+    const continuar = document.getElementById("continuar");
+    const sair = document.getElementById("sair");
+    const container = document.querySelector(".container");
+    
+    
+    const gameState = {
+        canvas: document.querySelector("#gameCanvas"),
+        ctx: null,
+        tamanhoDaPeca: 10,
+        quantidadeDePeca: 35,
+        velocidade: 1,
+        tempoVelocidade: 100,
+        pos: { x: 5, y: 5 },
+        vel: { x: 1, y: 0 },
+        velAnterior: { x: null, y: null },
+        maca: { x: 10, y: 10 },
+        poder: { x: 20, y: 20},
+        rastro: [],
+        tail: 5,
+        temPoder: false,
+        pontuacao: 0,
+        cobraVerde: true,
+        tempo: 0,
+        poderTempo: 0,
+        jogoPausado: false,
+        ultimoFrame: 0,
+        particulas: [],
+        contagem: null,
+        movimenta: null,
+        poderVisivel: true,
+        
+        contarTempo() {
+            if (this.contagem !== null) clearInterval(this.contagem);
+            this.contagem = setInterval(this.contarTempo, 200)
+            this.tempo += 10;
+            document.getElementById("tempo").textContent = this.tempo;
+        },
+        
+        atualizarPontuacao() {
+            document.getElementById("pontuacao").textContent = "Pontuação: " + this.pontuacao;
+        },
+        
+        pausarJogo() {
+            this.jogoPausado = true;
+            this.velAnterior.x = this.vel.x;
+            this.velAnterior.y = this.vel.y;
+            clearInterval(this.movimenta);
+            clearInterval(this.contagem);
+            botoes.style.display = "none";
+            continuar.style.display = "block";
+            sair.style.display = "block";
+            pausar.style.display = "none";
+            mensagem_perdeu.style.display = "none";
+        },
+        
+        continuarJogo() {
+            if (!this.jogoPausado) return;
+            this.jogoPausado = false;
+            
+            this.ultimoFrame = performance.now();
+            
+            this.vel.x = this.velAnterior.x;
+            this.vel.y = this.velAnterior.y;
+            
+            console.log('velXAnterior:', this.velAnterior.x, 'velYAnterior:', this.velAnterior.y);
+            
+            this.movimenta = setInterval(meuGame, this.tempoVelocidade);
+            this.contagem = setInterval(this.contarTempo.bind(this), 200);
+            botoes.style.display = "block";
+            pausar.style.display = "block";
+            continuar.style.display = "none";
+            sair.style.display = "none";
+            pausar.style.paddingLeft = "8px";
+            pausar.style.paddingTop = "4px";
+            jogarNovamente.style.display = "none";
+            voltar.style.display = "none";
+            mensagem_perdeu.style.display = "none";
+        },
+        
+        configurarControles() {
+            document.addEventListener("keydown", (event) => controlePc(event, this));
+            controleMobile(this);
+        }
     };
+    
+    
+    let {
+        ctx,
+        tamanhoDaPeca,
+        quantidadeDePeca,
+        velocidade,
+        pos,
+        vel,
+        velAnterior,
+        maca,
+        poder,
+        rastro,
+        tail,
+        temPoder,
+        cobraVerde,
+        tempo,
+        jogoPausado,
+        ultimoFrame,
+        particulas,
+        movdimenta,
+        poderVisivel
+    } = gameState;
+    
+    
+    ctx = gameState.canvas.getContext("2d");
+    
     
     //incia jogo automaticamente
     if (typeof container === "undefined") {
@@ -53,109 +126,52 @@ window.onload = function () {
     } else {
         container.style.display = "block";
     }
-    contagem = setInterval(contarTempo, 200);
-    console.log("Iniciado automático");
     
     
-    //funcao para configurar controles
-    function configurarControles() {
-        document.addEventListener("keydown", (event) => controlePc(event, estado));
-        controleMobile(estado);
-    }
-    
-    //pontucaco
-    function atualizarPontuacao() {
-        document.getElementById("pontuacao").textContent = "Pontuação: " + pontuacao;
-    }
-
-    //tempo do jogo
-    function contarTempo() {
-        if (contagem !== null) clearInterval(contagem);
-        contagem = setInterval(contarTempo, 200)
-        tempo += 10;
-        document.getElementById("tempo").textContent = tempo;
-    }
-
-    function pausarJogo(){
-        jogoPausado = true;
-        velXAnterior = estado.velX;
-        velYAnterior = estado.velY;
-        clearInterval(movimenta);
-        clearInterval(contagem);
-        botoes.style.display = "none";
-        continuar.style.display = "block";
-        sair.style.display = "block";
-        pausar.style.display = "none";
-        mensagem_perdeu.style.display = "none";
-    }
-    
-    function continuarJogo(){
-        if (!jogoPausado) return;
-        jogoPausado = false;
-        
-        ultimoFrame = performance.now();
-        
-        estado.velX = velXAnterior;
-        estado.velY = velYAnterior;
-        
-        contagem = setInterval(contarTempo, 200);
-        
-        console.log('velXAnterior:', velXAnterior, 'velYAnterior:', velYAnterior);
-        
-        movimenta = setInterval(meuGame, tempoVelocidade);
-        contagem = setInterval(contarTempo, 200);
-        botoes.style.display = "block";
-        pausar.style.display = "block";
-        continuar.style.display = "none";
-        sair.style.display = "none";
-        pausar.style.paddingLeft = "8px";
-        pausar.style.paddingTop = "4px";
-        jogarNovamente.style.display = "none";
-        voltar.style.display = "none";
-        mensagem_perdeu.style.display = "none";
-    }
-
     //botao pausar
     pausar.addEventListener("click", () => {
-       pausarJogo();
+       gameState.pausarJogo();
     });
+    
     
     // botão continuar
     continuar.addEventListener("click", () => {
-       continuarJogo();
+       gameState.continuarJogo();
     });
+    
     
     // botão jogar novamente
     jogarNovamente.addEventListener("click", () => {
        Carregar();
     });
     
+    
     //funcao do jogo
     var meuGame = () => {
         if (jogoPausado) return;
         
-        console.log("Game rodando", estado.velX, estado.velY);
+        console.log("Game rodando", vel.x,vel.y);
         
         function desenhaTabuleiro() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, gameState.canvas.width, gameState.canvas.height);
             mensagem_perdeu.style.display = "none";
             
-            canvas.width = 350;
-            canvas.height = 350;
+            gameState.canvas.width = 350;
+            gameState.canvas.height = 350;
             
             // background tabuleiro
             ctx.fillStyle = "#121212";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            canvas.style.opacity = 0.8;
+            ctx.fillRect(0, 0, gameState.canvas.width, gameState.canvas.height);
+            gameState.canvas.style.opacity = 0.8;
             
             // movimentacao e teletransporte
-            posX += estado.velX;
-            posY += estado.velY;
+            pos.x += vel.x;
+            pos.y += vel.y;
             
-            if (posX < 0) posX = quantidadeDePeca - 1;
-            if (posX > quantidadeDePeca - 1) posX = 0;
-            if (posY < 0) posY = quantidadeDePeca - 1;
-            if (posY > quantidadeDePeca - 1) posY = 0;
+            if (pos.x < 0) pos.x = quantidadeDePeca - 1;
+            if (pos.x > quantidadeDePeca - 1) pos.x = 0;
+            if (pos.y < 0) pos.y = quantidadeDePeca - 1;
+            if (pos.y > quantidadeDePeca - 1) pos.y = 0;
         }
         
         // desenha grade do tabuleiro
@@ -167,17 +183,17 @@ window.onload = function () {
             ctx.strokeStyle = "#2b2b2b";
             ctx.lineWidth = 1;
             
-            for (var x = 0; x < canvas.width; x += tamanhoDaPeca) {
+            for (var x = 0; x < gameState.canvas.width; x += tamanhoDaPeca) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
+                ctx.lineTo(x, gameState.canvas.height);
                 ctx.stroke();
             }
             
-            for (var y = 0; y < canvas.height; y += tamanhoDaPeca) {
+            for (var y = 0; y < gameState.canvas.height; y += tamanhoDaPeca) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
+                ctx.lineTo(gameState.canvas.width, y);
                 ctx.stroke();
             }
         }
@@ -185,7 +201,7 @@ window.onload = function () {
         //desenha a maça
         function desenhaMaca(){
             ctx.fillStyle = "#E74C3C";
-            ctx.fillRect(macaX * tamanhoDaPeca, macaY * tamanhoDaPeca, tamanhoDaPeca, tamanhoDaPeca);
+            ctx.fillRect(maca.x * tamanhoDaPeca, maca.y * tamanhoDaPeca, tamanhoDaPeca, tamanhoDaPeca);
         }
         
         //gera a cor rbg das partículas a partir de um código hexadecimal
@@ -265,8 +281,8 @@ window.onload = function () {
                 
                 ctx.fillStyle = "#6C5CE7";
                 ctx.fillRect(
-                    poderX * tamanhoDaPeca,
-                    poderY * tamanhoDaPeca,
+                    poder.x * tamanhoDaPeca,
+                    poder.y * tamanhoDaPeca,
                     tamanhoDaPeca,
                     tamanhoDaPeca
                 );
@@ -308,9 +324,9 @@ window.onload = function () {
                 ctx.fillRect(rastro[i].x * tamanhoDaPeca, rastro[i].y * tamanhoDaPeca, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
                 
                 //verifica colisao da cobra com ela mesma
-                if (!temPoder && rastro[i].x == posX && rastro[i].y == posY) {
-                    estado.velX = 0;
-                    estado.velY = 0;
+                if (!temPoder && rastro[i].x == pos.x && rastro[i].y == pos.y) {
+                    vel.x = 0;
+                    vel.y = 0;
                     tail = 5;
                     mensagem_perdeu.style.display = "block";
                     pausar.style.display = "none";
@@ -357,9 +373,9 @@ window.onload = function () {
         
         //desenha rastro
         function desenhaRastro(){
-            rastro.push({
-                x: posX,
-                y: posY
+            gameState.rastro.push({
+                x: pos.x,
+                y: pos.y
             });
             
             while (rastro.length > tail) {
@@ -369,8 +385,8 @@ window.onload = function () {
         
         //funcao para  atualizar a nova posiçao do poder
         function posicaoPoder(){
-            poderX = Math.floor(Math.random() * quantidadeDePeca);
-            poderY = Math.floor(Math.random() * quantidadeDePeca);
+            poder.x = Math.floor(Math.random() * quantidadeDePeca);
+            poder.y = Math.floor(Math.random() * quantidadeDePeca);
 
             poderVisivel = true;
             desenharPoder();
@@ -378,8 +394,8 @@ window.onload = function () {
 
         //funcao para  atualizar a nova posiçao da maça
         function posicaoMaca(){
-            macaX = Math.floor(Math.random() * quantidadeDePeca);
-            macaY = Math.floor(Math.random() * quantidadeDePeca);
+            maca.x = Math.floor(Math.random() * quantidadeDePeca);
+            maca.y = Math.floor(Math.random() * quantidadeDePeca);
         }
         
         // Verifica se um círculo colidiu com um retângulo
@@ -395,16 +411,16 @@ window.onload = function () {
         //
         function verificaColisaoCobraOuAuraComMaca() {
             //colisao cobra e maça sem poder
-            const colidiuComCobra = (macaX === posX && macaY === posY);
+            const colidiuComCobra = (maca.x === pos.x  && maca.y  === pos.y);
             
             let colidiuComAura = false;
             if (temPoder) {
-                const cx = (posX + 0.5) * tamanhoDaPeca;
-                const cy = (posY + 0.5) * tamanhoDaPeca;
+                const cx = (pos.x + 0.5) * tamanhoDaPeca;
+                const cy = (pos.y + 0.5) * tamanhoDaPeca;
                 const raioAura = tamanhoDaPeca * 2.2;
                 
-                const rx = macaX * tamanhoDaPeca;
-                const ry = macaY * tamanhoDaPeca;
+                const rx = maca.x * tamanhoDaPeca;
+                const ry = maca.y * tamanhoDaPeca;
                 
                 if (colisaoCirculoRetangulo(cx, cy, raioAura, rx, ry, tamanhoDaPeca, tamanhoDaPeca)) {
                     colidiuComAura = true;
@@ -416,34 +432,34 @@ window.onload = function () {
                 //aplica colisao especial
                 if(colidiuComAura){
                     explodirParticulas(
-                        macaX * tamanhoDaPeca + tamanhoDaPeca / 2,
-                        macaY * tamanhoDaPeca + tamanhoDaPeca / 2,
+                        maca.x * tamanhoDaPeca +     tamanhoDaPeca / 2,
+                        maca.y * tamanhoDaPeca + tamanhoDaPeca / 2,
                         "#E74C3C"
                     );
                 }
                 tail++;
                 posicaoMaca();
                 
-                pontuacao += 10;
+                gameState.pontuacao += 10;
                 
-                if (pontuacao % 100 === 0) {
-                    tempoVelocidade -= 10;
-                    if (tempoVelocidade < 50) tempoVelocidade = 50;
+                if (gameState.pontuacao % 100 === 0) {
+                    gameState.tempoVelocidade -= 10;
+                    if (gameState.tempoVelocidade < 50) gameState.tempoVelocidade = 50;
                     
-                    clearInterval(movimenta);
-                    movimenta = setInterval(meuGame, tempoVelocidade);
+                    clearInterval(gameState.movimenta);
+                    gameState.movimenta = setInterval(meuGame, gameState.tempoVelocidade);
                     
-                    console.log("Atualizou velocidade: ", tempoVelocidade);
+                    console.log("Atualizou velocidade: ", gameState.tempoVelocidade);
                 }
                 
-                document.getElementById("pontuacao").innerHTML = "Pontuação: " + pontuacao;
-                atualizarPontuacao();
+                document.getElementById("pontuacao").innerHTML = "Pontuação: " + gameState.pontuacao;
+                gameState.atualizarPontuacao();
             }
         }
     
         //verifica colisao da cobra com o poder
         function verificaColisaoCobraEPoder(){
-            if (poderX == posX && poderY == posY) {
+            if (poder.x == pos.x && poder.y == pos.y) {
                 poderVisivel = false;
                 //ativa e remove poder
                 if (!temPoder) {
@@ -455,14 +471,14 @@ window.onload = function () {
                     
                     
                     //mostr o tempo  restante do poder
-                    var poderTempo = 7;
+                    gameState.poderTempo = 7;
                     
-                    for (let i = 0; i <= poderTempo; i++) {
+                    for (let i = 0; i <= gameState.poderTempo; i++) {
                         setTimeout(() => {
-                            if (poderTempo - i === 0) {
+                            if (gameState.poderTempo - i === 0) {
                                 document.getElementById("tempo-poder").innerHTML = " ";
                             } else {
-                                document.getElementById("tempo-poder").innerHTML = `${poderTempo - i}`
+                                document.getElementById("tempo-poder").innerHTML = `${gameState.poderTempo - i}`
                             }
                         }, 1000 * i);
                     }
@@ -475,6 +491,8 @@ window.onload = function () {
                 }, 15000);
             }
         }
+        // === INICIA AUTOMATICAMENTE ===
+        gameState.contarTempo();
         
         // === RENDERIZAÇÃO ===
         desenhaTabuleiro();
@@ -491,12 +509,12 @@ window.onload = function () {
         verificaColisaoCobraEPoder();
         
         // === CONFIGURACOES ===
-        configurarControles();
+        gameState.configurarControles();
     };
 
     //MOTOR - nao é o ideal, mas funciona!
-    movimenta = setInterval(
+    gameState.movimenta = setInterval(
         meuGame,
-        tempoVelocidade
+        gameState.tempoVelocidade
     );
 };
