@@ -1,7 +1,7 @@
 {
   "name": "Meu Joguinho",
-  "short_name": "Joguinho",
-  "start_url": "./index.html",
+  "short_name": "Snake Game",
+  "start_url": "./home.html",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#121212",
