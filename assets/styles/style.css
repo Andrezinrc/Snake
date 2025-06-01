@@ -138,7 +138,7 @@ body {
 #voce-perdeu {
   display: none;
   position: relative;
-  top: -15rem;
+  top: -13rem;
   font-size: 50px;
   font-weight: bold;
   color: red;
@@ -146,20 +146,6 @@ body {
   text-align: center;
 }
 
-#feedback-final{
-  display: none;
-  position: relative;
-  text-align: center;
-  top: -14.5rem;
-  padding: 20px;
-  border-radius: 10px;
-  opacity: 1;
-}
-
-#feedback-final h2,
-#feedback-final p{
-  color: white;
-}
 .jogar-novamente {
   display: none;
 }
