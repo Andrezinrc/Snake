@@ -1,20 +1,27 @@
 import { controlePc, controleMobile } from "./controles.js";
 
+//inicia o jogo
 window.onload = function () {
-    
-    const mensagem_perdeu = document.getElementById("voce-perdeu");
-    const jogarNovamente = document.getElementById("jogar-novamente");
-    const botoes = document.getElementById("botoes");
-    const voltar = document.getElementById("voltar");
-    const pausar = document.getElementById("pausar");
-    const continuar = document.getElementById("continuar");
-    const sair = document.getElementById("sair");
-    const container = document.querySelector(".container");
-    
     
     const gameState = {
         canvas: document.querySelector("#gameCanvas"),
         ctx: null,
+        
+        //Elementos da interface
+        container: document.querySelector(".container"),
+        mensagem_perdeu: document.getElementById("voce-perdeu"),
+        botoes: document.getElementById("botoes"),
+        pausar: document.getElementById("pausar"),
+        continuar: document.getElementById("continuar"),
+        jogarNovamente: document.getElementById("jogar-novamente"),
+        sair: document.getElementById("sair"),
+        
+        //Inicializa o contexto do canvas
+        init() {
+            this.ctx = this.canvas.getContext("2d");
+        },
+        
+        // Parâmetros do jogo
         tamanhoDaPeca: 10,
         quantidadeDePeca: 35,
         velocidade: 1,
@@ -28,6 +35,8 @@ window.onload = function () {
         tail: 5,
         temPoder: false,
         pontuacao: 0,
+        ultimaPontuacaoVerificada: 0,
+        dificuldadeAtual: 0,
         cobraVerde: true,
         tempo: 0,
         poderTempo: 0,
@@ -37,7 +46,21 @@ window.onload = function () {
         contagem: null,
         movimenta: null,
         poderVisivel: true,
+        tongueVisible: true,
+        perdeu: false,
         
+        //funções relacionadas a interface
+        initUI() {
+            this.container = document.querySelector(".container"),
+            this.mensagem_perdeu = document.getElementById("voce-perdeu");
+            this.pausar = document.getElementById("pausar");
+            this.continuar = document.getElementById("continuar");
+            this.sair = document.getElementById("sair");
+            this.jogarNovamente = document.getElementById("jogarNovamente");
+            this.voltar = document.getElementById("voltar");
+        },
+        
+        // atualiza o tempo na interface
         contarTempo() {
             if (this.contagem !== null) clearInterval(this.contagem);
             this.contagem = setInterval(this.contarTempo, 200)
@@ -45,10 +68,12 @@ window.onload = function () {
             document.getElementById("tempo").textContent = this.tempo;
         },
         
+        // atualiza a pontuação na interface
         atualizarPontuacao() {
             document.getElementById("pontuacao").textContent = "Pontuação: " + this.pontuacao;
         },
         
+        // controle de pausa e continuação
         pausarJogo() {
             this.jogoPausado = true;
             this.velAnterior.x = this.vel.x;
@@ -59,7 +84,7 @@ window.onload = function () {
             continuar.style.display = "block";
             sair.style.display = "block";
             pausar.style.display = "none";
-            mensagem_perdeu.style.display = "none";
+            this.mensagem_perdeu.style.display = "none";
         },
         
         continuarJogo() {
@@ -83,9 +108,50 @@ window.onload = function () {
             pausar.style.paddingTop = "4px";
             jogarNovamente.style.display = "none";
             voltar.style.display = "none";
-            mensagem_perdeu.style.display = "none";
+            this.mensagem_perdeu.style.display = "none";
+         },
+        
+        //game over
+        gameOver() {
+            this.vel.x = 0;
+            this.vel.y = 0;
+            this.tail = 5;
+            this.perdeu = true;
+            this.mensagem_perdeu.style.display = "block";
+            this.pausar.style.display = "none";
+            this.botoes.style.display = "none";
+            this.jogarNovamente.style.display = "block";
+            this.voltar.style.display = "block";
+            
+            localStorage.setItem("pontuacao", this.pontuacao);
+            
+            clearInterval(this.contagem);
         },
         
+        //configuração dos botões
+        configurarBotoes() {
+            this.pausar.addEventListener("click", () => {
+                this.pausarJogo();
+            });
+            
+            this.continuar.addEventListener("click", () => {
+                this.continuarJogo();
+            });
+    
+            this.jogarNovamente.addEventListener("click", () => {
+                Carregar();
+            });
+            
+            this.voltar.addEventListener("click", () => {
+                window.location.href = "home.html";
+            });
+            
+            this.sair.addEventListener("click", () => {
+                window.location.href = "https://www.google.com.br";
+            });
+        },
+        
+        // configuração dos controles teclado e mobile
         configurarControles() {
             document.addEventListener("keydown", (event) => controlePc(event, this));
             controleMobile(this);
@@ -93,6 +159,11 @@ window.onload = function () {
     };
     
     
+    //Inicializa o contexto do canvas
+    gameState.init();
+    
+    
+    // desestruturação de variáveis para leitura fácil
     let {
         ctx,
         tamanhoDaPeca,
@@ -116,36 +187,6 @@ window.onload = function () {
     } = gameState;
     
     
-    ctx = gameState.canvas.getContext("2d");
-    
-    
-    //incia jogo automaticamente
-    if (typeof container === "undefined") {
-        const container = document.getElementById("container");
-        container.style.display = "block";
-    } else {
-        container.style.display = "block";
-    }
-    
-    
-    //botao pausar
-    pausar.addEventListener("click", () => {
-       gameState.pausarJogo();
-    });
-    
-    
-    // botão continuar
-    continuar.addEventListener("click", () => {
-       gameState.continuarJogo();
-    });
-    
-    
-    // botão jogar novamente
-    jogarNovamente.addEventListener("click", () => {
-       Carregar();
-    });
-    
-    
     //funcao do jogo
     var meuGame = () => {
         if (jogoPausado) return;
@@ -154,7 +195,7 @@ window.onload = function () {
         
         function desenhaTabuleiro() {
             ctx.clearRect(0, 0, gameState.canvas.width, gameState.canvas.height);
-            mensagem_perdeu.style.display = "none";
+            gameState.mensagem_perdeu.style.display = "none";
             
             gameState.canvas.width = 350;
             gameState.canvas.height = 350;
@@ -325,16 +366,7 @@ window.onload = function () {
                 
                 //verifica colisao da cobra com ela mesma
                 if (!temPoder && rastro[i].x == pos.x && rastro[i].y == pos.y) {
-                    vel.x = 0;
-                    vel.y = 0;
-                    tail = 5;
-                    mensagem_perdeu.style.display = "block";
-                    pausar.style.display = "none";
-                    botoes.style.display = "none";
-                    jogarNovamente.style.display = "block";
-                    voltar.style.display = "block";
-                    localStorage.setItem("pontuacao", pontuacao);
-                    clearInterval(contagem);
+                    gameState.gameOver();
                 }
             }
         }
@@ -369,6 +401,22 @@ window.onload = function () {
                 
                 ctx.fillStyle = corOriginal;
             }
+        }
+        
+        //desenha lingua
+        function desenhaLingua(){
+            if (rastro.length > 0) {
+                const cabeca = rastro[rastro.length - 1];
+                if (gameState.tongueVisible) {
+                    ctx.fillStyle = 'red';
+                    ctx.fillRect((cabeca.x + 0.5) * tamanhoDaPeca, (cabeca.y + 
+                    0.9) * tamanhoDaPeca, tamanhoDaPeca / 2, tamanhoDaPeca / 4);
+                }
+            }
+            
+            setInterval(() => {
+                gameState.tongueVisible = !gameState.tongueVisible;
+            }, 500);
         }
         
         //desenha rastro
@@ -442,17 +490,8 @@ window.onload = function () {
                 
                 gameState.pontuacao += 10;
                 
-                if (gameState.pontuacao % 100 === 0) {
-                    gameState.tempoVelocidade -= 10;
-                    if (gameState.tempoVelocidade < 50) gameState.tempoVelocidade = 50;
-                    
-                    clearInterval(gameState.movimenta);
-                    gameState.movimenta = setInterval(meuGame, gameState.tempoVelocidade);
-                    
-                    console.log("Atualizou velocidade: ", gameState.tempoVelocidade);
-                }
-                
-                document.getElementById("pontuacao").innerHTML = "Pontuação: " + gameState.pontuacao;
+                document.getElementById("pontuacao").innerHTML = "Pontuação: " + 
+                gameState.pontuacao;
                 gameState.atualizarPontuacao();
             }
         }
@@ -468,7 +507,6 @@ window.onload = function () {
                     setTimeout(function() {
                         temPoder = false;
                     }, 7000);
-                    
                     
                     //mostr o tempo  restante do poder
                     gameState.poderTempo = 7;
@@ -492,13 +530,17 @@ window.onload = function () {
             }
         }
         // === INICIA AUTOMATICAMENTE ===
-        gameState.contarTempo();
+        gameState.initUI();
+        if(!gameState.perdeu){
+            gameState.contarTempo();
+        }
         
         // === RENDERIZAÇÃO ===
         desenhaTabuleiro();
         desenhaGrade();
         desenhaCobra();
         desenhaOlhos();
+        desenhaLingua();
         desenhaRastro();
         desenhaMaca();
         desenharParticulas();
@@ -509,12 +551,38 @@ window.onload = function () {
         verificaColisaoCobraEPoder();
         
         // === CONFIGURACOES ===
+        gameState.configurarBotoes();
         gameState.configurarControles();
     };
 
-    //MOTOR - nao é o ideal, mas funciona!
-    gameState.movimenta = setInterval(
-        meuGame,
-        gameState.tempoVelocidade
-    );
+    // === GAME LOOP ===
+    function gameLoop(agora) {
+        if (gameState.jogoPausado) return;
+        
+        const delta = agora - gameState.ultimoFrame;
+        
+        if (delta >= gameState.tempoVelocidade) {
+            gameState.ultimoFrame = agora;
+            meuGame();
+            
+            const dificuldadeCalculada = Math.floor(gameState.pontuacao / 100);
+            
+            if (dificuldadeCalculada > gameState.dificuldadeAtual) {
+                gameState.dificuldadeAtual = dificuldadeCalculada;
+                
+                gameState.tempoVelocidade -= 10;
+                if (gameState.tempoVelocidade < 50) {
+                    gameState.tempoVelocidade = 50;
+                    console.log("Velocidade maxima atingida: ", gameState.tempoVelocidade);
+                }
+                
+                console.log("Velocidade aumentada: ", gameState.tempoVelocidade);
+            }
+        }
+        
+        requestAnimationFrame(gameLoop);
+    }
+    
+    gameState.ultimoFrame = performance.now();
+    requestAnimationFrame(gameLoop);
 };
