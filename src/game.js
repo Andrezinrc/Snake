@@ -130,7 +130,9 @@ window.onload = function () {
             this.jogarNovamente.style.display = "block";
             this.voltar.style.display = "block";
             
-            if (this.pontuacao > this.recordeSalvo) {
+            if(recordeSalvo < 1){
+                document.getElementById("mensagem-final").textContent = "Primeiro passo rumo ao topo!";
+            } else if (this.pontuacao > this.recordeSalvo) {
                 localStorage.setItem("recorde", this.pontuacao);
                 document.getElementById("mensagem-final").textContent = "Novo recorde! Você mandou muito bem!";
             } else if (this.pontuacao >= this.recordeSalvo * 0.8) {
