@@ -15,6 +15,9 @@ window.onload = function () {
         continuar: document.getElementById("continuar"),
         jogarNovamente: document.getElementById("jogar-novamente"),
         sair: document.getElementById("sair"),
+        feedbackFinal: document.getElementById("feedback-final"),
+        pontuacaoFinal: document.getElementById("pontuacao-final"),
+        recordeFinal: document.getElementById("recorde-final"),
         
         //Inicializa o contexto do canvas
         init() {
@@ -36,6 +39,7 @@ window.onload = function () {
         temPoder: false,
         pontuacao: 0,
         ultimaPontuacaoVerificada: 0,
+        recordeSalvo: localStorage.getItem("recorde") || 0,
         dificuldadeAtual: 0,
         cobraVerde: true,
         tempo: 0,
@@ -58,6 +62,9 @@ window.onload = function () {
             this.sair = document.getElementById("sair");
             this.jogarNovamente = document.getElementById("jogarNovamente");
             this.voltar = document.getElementById("voltar");
+            this.feedbackFinal = document.getElementById("feedback-final");
+            this.pontuacaoFinal = document.getElementById("pontuacao-final");
+            this.recordeFinal = document.getElementById("recorde-final");
         },
         
         // atualiza o tempo na interface
@@ -109,7 +116,7 @@ window.onload = function () {
             jogarNovamente.style.display = "none";
             voltar.style.display = "none";
             this.mensagem_perdeu.style.display = "none";
-         },
+        },
         
         //game over
         gameOver() {
@@ -123,8 +130,20 @@ window.onload = function () {
             this.jogarNovamente.style.display = "block";
             this.voltar.style.display = "block";
             
-            localStorage.setItem("pontuacao", this.pontuacao);
+            if (this.pontuacao > this.recordeSalvo) {
+                localStorage.setItem("recorde", this.pontuacao);
+                document.getElementById("mensagem-final").textContent = "Novo recorde! Você mandou muito bem!";
+            } else if (this.pontuacao >= this.recordeSalvo * 0.8) {
+                document.getElementById("mensagem-final").textContent = "Você quase bateu o recorde!";
+            } else {
+                document.getElementById("mensagem-final").textContent = "Ainda dá pra melhorar!";
+            }
+    
+            document.getElementById("pontuacao-final").textContent = this.pontuacao;
+            document.getElementById("recorde-final").textContent = Math.max(this.pontuacao, this.recordeSalvo);
             
+            document.getElementById("feedback-final").style.display = "block";
+        
             clearInterval(this.contagem);
         },
         
