@@ -26,9 +26,10 @@ window.onload = function () {
         quantidadeDePeca: 35,
         velocidade: 1,
         tempoVelocidade: 105,
-        tempoVelocidadeInimiga: 300,
+        tempoVelocidadeInimiga: 150,
         pos: { x: 5, y: 5 },
         vel: { x: 1, y: 0 },
+        ultimaDirecao: { x: 0, y: 0 },
         velAnterior: { x: null, y: null },
         maca: { x: 10, y: 10 },
         poder: { x: 20, y: 20},
@@ -364,30 +365,55 @@ window.onload = function () {
         }
         
         // desenha a cobrinha
-        function desenhaCobra(){
-            for (var i = 0; i < rastro.length; i++){
-
+        function desenhaCobra() {
+            for (var i = 0; i < rastro.length; i++) {
                 const x = rastro[i].x * tamanhoDaPeca;
                 const y = rastro[i].y * tamanhoDaPeca;
-                
                 const isCabeca = i === rastro.length - 1;
-            
-                ctx.fillStyle = isCabeca ? "#00ffaa" : "#002a1e";
-                ctx.fillRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
                 
-                ctx.strokeStyle = isCabeca ? "#00ffcc" : "#003322";
-                ctx.strokeRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
-                
-                // bit binario estilo terminal
-                if (!isCabeca) {
-                    ctx.fillStyle = "rgba(0,255,140,0.5)";
-                    ctx.font = "bold 10px monospace";
-                    const bit = Math.random() > 0.5 ? "1" : "0";
-                    ctx.fillText(bit, x + 3, y + 8);
+                if (temPoder) {
+                    if (isCabeca) {
+                        ctx.fillStyle = "#9B59FF";
+                        ctx.fillRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
+                    } else {
+                        ctx.fillStyle = "rgba(108, 92, 231, 0.5)";
+                        ctx.fillRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
+                    }
+                    
+                    // Bits roxos
+                    if (!isCabeca) {
+                        ctx.fillStyle = "#9B59FF";
+                        ctx.font = "bold 10px monospace";
+                        
+                        const bit = Math.random() > 0.5 ? "1" : "0";
+                        
+                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+                        ctx.strokeText(bit, x + 3, y + 8);
+                        ctx.fillText(bit, x + 3, y + 8);
+                        ctx.lineWidth = 1
+                    }
+                } else {
+                    if (isCabeca) {
+                        ctx.fillStyle = "#00ffaa";
+                        ctx.fillRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
+                    } else {
+                        ctx.fillStyle = "#002a1e";
+                        ctx.fillRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
+                        
+                        ctx.strokeStyle = "#003322";
+                        ctx.strokeRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
+                        
+                        // Bits verdes com transparência
+                        ctx.fillStyle = "rgba(0,255,140,0.5)";
+                        ctx.font = "bold 10px monospace";
+                        const bit = Math.random() > 0.5 ? "1" : "0";
+                        ctx.fillText(bit, x + 3, y + 8);
+                    }
                 }
                 
-                //verifica colisao da cobra com ela mesma
-                if (!temPoder && rastro[i].x == pos.x && rastro[i].y == pos.y) {
+                // Colisão com o próprio corpo
+                if (!temPoder && rastro[i].x === pos.x && rastro[i].y === pos.y) {
                     gameState.gameOver();
                 }
             }
@@ -423,8 +449,13 @@ window.onload = function () {
             if (agora - tempoUltimoMovInimiga < gameState.tempoVelocidadeInimiga) return;
             tempoUltimoMovInimiga = agora;
             
-            // Atualiza estado com base no tamanho
-            cobraInimiga.estado = cobraInimiga.tail < 5 ? "fugindo" : "atacando";
+            //se jogador tem poder, ela foge
+            if (temPoder) {
+                cobraInimiga.estado = "fugindo";
+            } else {
+                cobraInimiga.estado = cobraInimiga.tail < 5 ? "fugindo" : "atacando";
+            }
+            
             
             let alvo;
             
@@ -523,13 +554,15 @@ window.onload = function () {
                 }
             }
             
-            //Se a cabeça da inimiga colidir com o corpo do jogador
-            for (let i = 0; i < rastro.length - 1; i++) {
-                if (rastro[i].x === cabecaInimiga.x && rastro[i].y === cabecaInimiga.y) {
-                    
-                    //Jogador perde 1, ela ganha 1
-                    if (tail > 1) tail--;
-                    cobraInimiga.tail++;
+            if(!temPoder){
+                //Se a cabeça da inimiga colidir com o corpo do jogador
+                for (let i = 0; i < rastro.length - 1; i++) {
+                    if (rastro[i].x === cabecaInimiga.x && rastro[i].y === cabecaInimiga.y) {
+                        
+                        //Jogador perde 1, ela ganha 1
+                        if (tail > 1) tail--;
+                        cobraInimiga.tail++;
+                    }
                 }
             }
         }
@@ -603,15 +636,21 @@ window.onload = function () {
         }
                 
         //desenha lingua
-        function desenhaLingua(){
-            if (rastro.length > 0) {
-                const cabeca = rastro[rastro.length - 1];
-                if (gameState.tongueVisible) {
-                    ctx.fillStyle = 'red';
-                    ctx.fillRect((cabeca.x + 0.5) * tamanhoDaPeca, (cabeca.y + 
-                    0.9) * tamanhoDaPeca, tamanhoDaPeca / 2, tamanhoDaPeca / 4);
+        function desenhaLingua() {
+            [rastro, cobraInimiga.rastro].forEach(cobraRastro => {
+                if (cobraRastro.length > 0) {
+                    const cabeca = cobraRastro[cobraRastro.length - 1];
+                    if (gameState.tongueVisible) {
+                        ctx.fillStyle = (cobraRastro === rastro) ? 'red' : '#ff5555'; // cor diferente pra inimiga
+                        ctx.fillRect(
+                            (cabeca.x + 0.5) * tamanhoDaPeca,
+                            (cabeca.y + 0.9) * tamanhoDaPeca,
+                            tamanhoDaPeca / 2,
+                            tamanhoDaPeca / 4
+                        );
+                    }
                 }
-            }
+            });
             
             setInterval(() => {
                 gameState.tongueVisible = !gameState.tongueVisible;
@@ -764,6 +803,9 @@ window.onload = function () {
     // === GAME LOOP ===
     function gameLoop(agora) {
         if (gameState.jogoPausado) return;
+        
+        gameState.ultimaDirecao.x = gameState.vel.x;
+        gameState.ultimaDirecao.y = gameState.vel.y;
         
         const delta = agora - gameState.ultimoFrame;
         
