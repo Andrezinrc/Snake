@@ -482,7 +482,7 @@ window.onload = function () {
                     explodirParticulas(
                         maca.x * tamanhoDaPeca +     tamanhoDaPeca / 2,
                         maca.y * tamanhoDaPeca + tamanhoDaPeca / 2,
-                        "#E74C3C"
+                        "#00ff88"
                     );
                 }
                 tail++;
