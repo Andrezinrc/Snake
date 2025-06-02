@@ -25,7 +25,7 @@ window.onload = function () {
         tamanhoDaPeca: 10,
         quantidadeDePeca: 35,
         velocidade: 1,
-        tempoVelocidade: 100,
+        tempoVelocidade: 130,
         pos: { x: 5, y: 5 },
         vel: { x: 1, y: 0 },
         velAnterior: { x: null, y: null },
@@ -63,14 +63,20 @@ window.onload = function () {
         // atualiza o tempo na interface
         contarTempo() {
             if (this.contagem !== null) clearInterval(this.contagem);
-            this.contagem = setInterval(this.contarTempo, 200)
-            this.tempo += 10;
+            this.contagem = setInterval(this.contarTempo, 1000)
+            this.tempo += 1;
             document.getElementById("tempo").textContent = this.tempo;
         },
-        
-        // atualiza a pontuação na interface
-        atualizarPontuacao() {
-            document.getElementById("pontuacao").textContent = "Pontuação: " + this.pontuacao;
+                
+       atualizarPontuacao() {
+            const bits = this.pontuacao;
+            const bytes = Math.floor(bits / 8);
+            const extra = bits % 8;
+            
+            let texto = `${bytes}B`;
+            if (extra > 0) texto += ` +${extra}b`;
+            
+            document.getElementById("pontuacao").textContent = texto;
         },
         
         // controle de pausa e continuação
@@ -238,11 +244,16 @@ window.onload = function () {
         }
         
         //desenha a maça
-        function desenhaMaca(){
-            ctx.fillStyle = "#E74C3C";
-            ctx.fillRect(maca.x * tamanhoDaPeca, maca.y * tamanhoDaPeca, tamanhoDaPeca, tamanhoDaPeca);
+        function desenhaMaca() {
+            const x = maca.x * tamanhoDaPeca;
+            const y = maca.y * tamanhoDaPeca;
+            
+            ctx.fillStyle = "#00ff88";
+            ctx.font = "bold 14px monospace";
+            const bit = Math.random() > 0.5 ? "1" : "0";
+            ctx.fillText(bit, x + 3, y + 9);
         }
-        
+                
         //gera a cor rbg das partículas a partir de um código hexadecimal
         function hexToRgb(hex) {
             hex = hex.replace('#', '');
@@ -334,34 +345,23 @@ window.onload = function () {
         function desenhaCobra(){
             for (var i = 0; i < rastro.length; i++){
 
-                //ativa efeito do poder
-                if (temPoder) {
-                    ctx.fillStyle = "#00D26A";
-                    
-                    if (cobraVerde) {
-                        ctx.fillStyle = "#6C5CE7";
-                    } else {
-                        ctx.fillStyle = "#00D26A";
-                    }
-                    cobraVerde = !cobraVerde;
-                    
-                }
-
                 const x = rastro[i].x * tamanhoDaPeca;
                 const y = rastro[i].y * tamanhoDaPeca;
-
-                ctx.fillStyle = "#00ff88";
-                ctx.fillRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
+                
+                const isCabeca = i === rastro.length - 1;
             
-                ctx.strokeStyle = "#003322";
+                ctx.fillStyle = isCabeca ? "#00ffaa" : "#002a1e";
+                ctx.fillRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
+                
+                ctx.strokeStyle = isCabeca ? "#00ffcc" : "#003322";
                 ctx.strokeRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
                 
-                //binario estilo Matrix
-                if (i < rastro.length - 1) {
-                    ctx.fillStyle = "black";
-                    ctx.font = "11px monospace";
+                // bit binario estilo terminal
+                if (!isCabeca) {
+                    ctx.fillStyle = "rgba(0,255,140,0.5)";
+                    ctx.font = "bold 10px monospace";
                     const bit = Math.random() > 0.5 ? "1" : "0";
-                    ctx.fillText(bit, x + 3, y + 8);
+                    ctx.fillText(bit, x + 3, y + 9);
                 }
                 
                 //verifica colisao da cobra com ela mesma
@@ -456,7 +456,7 @@ window.onload = function () {
             return distancia < raio;
         }
         
-        //
+        //verifica colisao da cobra e aura com a maca
         function verificaColisaoCobraOuAuraComMaca() {
             //colisao cobra e maça sem poder
             const colidiuComCobra = (maca.x === pos.x  && maca.y  === pos.y);
@@ -488,7 +488,7 @@ window.onload = function () {
                 tail++;
                 posicaoMaca();
                 
-                gameState.pontuacao += 10;
+                gameState.pontuacao += 1;
                 
                 document.getElementById("pontuacao").innerHTML = "Pontuação: " + 
                 gameState.pontuacao;
@@ -570,7 +570,7 @@ window.onload = function () {
             if (dificuldadeCalculada > gameState.dificuldadeAtual) {
                 gameState.dificuldadeAtual = dificuldadeCalculada;
                 
-                gameState.tempoVelocidade -= 10;
+                gameState.tempoVelocidade -= 5;
                 if (gameState.tempoVelocidade < 50) {
                     gameState.tempoVelocidade = 50;
                     console.log("Velocidade maxima atingida: ", gameState.tempoVelocidade);
