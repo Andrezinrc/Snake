@@ -25,7 +25,8 @@ window.onload = function () {
         tamanhoDaPeca: 10,
         quantidadeDePeca: 35,
         velocidade: 1,
-        tempoVelocidade: 130,
+        tempoVelocidade: 105,
+        tempoVelocidadeInimiga: 300,
         pos: { x: 5, y: 5 },
         vel: { x: 1, y: 0 },
         velAnterior: { x: null, y: null },
@@ -162,7 +163,6 @@ window.onload = function () {
         }
     };
     
-    
     //Inicializa o contexto do canvas
     gameState.init();
     
@@ -190,6 +190,23 @@ window.onload = function () {
         poderVisivel
     } = gameState;
     
+    let alvo;
+    let delayInimiga = 0;
+    const intervaloIA = 5;
+    let tempoUltimoMovInimiga = 0;
+    let cobraInimigaRespawnTimer = null;
+    
+    
+   //estado da cobra inimiga
+   let cobraInimiga = {
+        pos: { x: Math.floor(Math.random() * quantidadeDePeca), y: Math.floor(Math.random() * quantidadeDePeca) },
+        vel: { x: 0, y: 0 },
+        velAnterior: { x: null, y: null },
+        rastro: [],
+        tail: 5,
+        cor: "#ff0033",
+        ativa: true,
+    };
     
     //funcao do jogo
     var meuGame = () => {
@@ -217,6 +234,9 @@ window.onload = function () {
             if (pos.x > quantidadeDePeca - 1) pos.x = 0;
             if (pos.y < 0) pos.y = quantidadeDePeca - 1;
             if (pos.y > quantidadeDePeca - 1) pos.y = 0;
+            
+            cobraInimiga.pos.x = Math.max(0, Math.min(quantidadeDePeca - 1, cobraInimiga.pos.x));
+                cobraInimiga.pos.y = Math.max(0, Math.min(quantidadeDePeca - 1, cobraInimiga.pos.y));
         }
         
         // desenha grade do tabuleiro
@@ -266,7 +286,7 @@ window.onload = function () {
         //particulas de efeito de colisao
         function explodirParticulas(x, y, cor) {
             for (let i = 0; i < 10; i++) {
-                particulas.push({
+                gameState.particulas.push({
                     x: x,
                     y: y,
                     dx: (Math.random() - 0.5) * 6,
@@ -274,7 +294,7 @@ window.onload = function () {
                     alpha: 1,
                     size: Math.random() * 0.8 + 0.2,
                     cor: cor,
-                    life: Math.random() * 40 + 60
+                    vida: Math.random() * 40 + 60
                 });
             }
         }
@@ -297,6 +317,7 @@ window.onload = function () {
                     particulas.splice(i, 1);
                 }
             }
+            ctx.globalAlpha = 1.0;
         }
         
         //cria efeito animacao poder
@@ -320,6 +341,9 @@ window.onload = function () {
         
         // Função que desenha o poder se estiver visível
         function desenharPoder() {
+            const x = poder.x * tamanhoDaPeca;
+            const y = poder.y * tamanhoDaPeca;
+            
             if (poderVisivel) {
                 ctx.save();
                 
@@ -328,14 +352,12 @@ window.onload = function () {
                 ctx.shadowBlur = 20;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 0;
+            
                 
-                ctx.fillStyle = "#6C5CE7";
-                ctx.fillRect(
-                    poder.x * tamanhoDaPeca,
-                    poder.y * tamanhoDaPeca,
-                    tamanhoDaPeca,
-                    tamanhoDaPeca
-                );
+                ctx.fillStyle = "#9B59FF";
+                ctx.font = "bold 14px monospace";
+                const bit = Math.random() > 0.5 ? "1" : "0";
+                ctx.fillText(bit, x + 3, y + 9);
                 
                 ctx.restore();
             }
@@ -361,13 +383,167 @@ window.onload = function () {
                     ctx.fillStyle = "rgba(0,255,140,0.5)";
                     ctx.font = "bold 10px monospace";
                     const bit = Math.random() > 0.5 ? "1" : "0";
-                    ctx.fillText(bit, x + 3, y + 9);
+                    ctx.fillText(bit, x + 3, y + 8);
                 }
                 
                 //verifica colisao da cobra com ela mesma
                 if (!temPoder && rastro[i].x == pos.x && rastro[i].y == pos.y) {
                     gameState.gameOver();
                 }
+            }
+        }
+        
+        //desenha cobrinha inimiga
+        function desenhaCobraInimiga() {
+            if (!cobraInimiga.ativa) return;
+            
+            for (let i = 0; i < cobraInimiga.rastro.length; i++) {
+                const x = cobraInimiga.rastro[i].x * tamanhoDaPeca;
+                const y = cobraInimiga.rastro[i].y * tamanhoDaPeca;
+                
+                const isCabeca = i === cobraInimiga.rastro.length - 1;
+                
+                ctx.fillStyle = isCabeca ? "#ff0033" : "#2a0000";
+                ctx.fillRect(x, y, tamanhoDaPeca - 1, tamanhoDaPeca - 1);
+                
+                if (!isCabeca) {
+                    ctx.fillStyle = "red";
+                    ctx.font = "bold 10px monospace";
+                    const bit = Math.random() > 0.5 ? "1" : "0";
+                    ctx.fillText(bit, x + 3, y + 8);
+                }
+            }
+        }
+        
+        //atualiza cobrinha inimiga
+        function atualizarCobraInimiga() {
+            if (!cobraInimiga.ativa) return;
+            
+            const agora = Date.now();
+            if (agora - tempoUltimoMovInimiga < gameState.tempoVelocidadeInimiga) return;
+            tempoUltimoMovInimiga = agora;
+            
+            // Atualiza estado com base no tamanho
+            cobraInimiga.estado = cobraInimiga.tail < 5 ? "fugindo" : "atacando";
+            
+            let alvo;
+            
+            if (cobraInimiga.estado === "fugindo") {
+                //foge indo para a maçã
+                alvo = maca;
+            } else {
+                // Decide entre a maçã ou o jogador mais proximo
+                const distMaca = Math.abs(cobraInimiga.pos.x - maca.x) + Math.abs(cobraInimiga.pos.y - maca.y);
+                
+                let alvoJogadorMaisPerto = null;
+                let distJogadorMaisPerto = Infinity;
+                
+                for (let i = 0; i < rastro.length; i++) {
+                    const p = rastro[i];
+                    const dist = Math.abs(cobraInimiga.pos.x - p.x) + Math.abs(cobraInimiga.pos.y - p.y);
+                    if (dist < distJogadorMaisPerto) {
+                        distJogadorMaisPerto = dist;
+                        alvoJogadorMaisPerto = p;
+                    }
+                }
+                
+                alvo = distMaca < distJogadorMaisPerto ? maca : alvoJogadorMaisPerto;
+            }
+            
+            // Movimento em direção ao alvo
+            const dx = alvo.x - cobraInimiga.pos.x;
+            const dy = alvo.y - cobraInimiga.pos.y;
+            
+            if (Math.abs(dx) > Math.abs(dy)) {
+                cobraInimiga.vel.x = dx > 0 ? 1 : -1;
+                cobraInimiga.vel.y = 0;
+            } else {
+                cobraInimiga.vel.x = 0;
+                cobraInimiga.vel.y = dy > 0 ? 1 : -1;
+            }
+            
+            cobraInimiga.pos.x += cobraInimiga.vel.x;
+            cobraInimiga.pos.y += cobraInimiga.vel.y;
+            
+            cobraInimiga.rastro.push({ x: cobraInimiga.pos.x, y: cobraInimiga.pos.y });
+            while (cobraInimiga.rastro.length > cobraInimiga.tail) {
+                cobraInimiga.rastro.shift();
+            }
+            
+            // Se morrer
+            if (cobraInimiga.tail <= 3) {
+                cobraInimiga.ativa = false;
+                cobraInimigaRespawnTimer = Date.now() + 60000;
+                
+                //recria a cobrinha inimiga em 1 minuto após a morte
+                setTimeout(() => {
+                    Object.assign(cobraInimiga, {
+                        pos: {
+                            x: Math.floor(Math.random() * quantidadeDePeca),
+                            y: Math.floor(Math.random() * quantidadeDePeca)
+                        },
+                        vel: { x: 0, y: 0 },
+                        rastro: [],
+                        tail: 5,
+                        estado: "fugindo",
+                        ativa: true
+                    });
+                    cobraInimigaRespawnTimer = null;
+                }, 60000);
+            }
+            
+            // Mensagem de respawn
+            if (!cobraInimiga.ativa && cobraInimigaRespawnTimer) {
+                const tempoRestante = Math.ceil((cobraInimigaRespawnTimer - Date.now()) / 1000);
+                if (tempoRestante > 0) {
+                    ctx.fillStyle = "red";
+                    ctx.font = "bold 14px monospace";
+                    ctx.fillText(`⚠ Inimiga volta em ${tempoRestante}s`, 10, 20);
+                }
+            }
+        }
+                
+        //colisao da cobrinha inimiga com jogador
+        function checarColisaoComCobraInimiga() {
+            const cabecaInimiga = cobraInimiga.rastro[cobraInimiga.rastro.length - 1];
+            const cabecaJogador = rastro[rastro.length - 1];
+            
+            // Se jogador colidir com o corpo da inimiga
+            for (let i = 0; i < cobraInimiga.rastro.length - 1; i++) {
+                if (rastro.length > 0 &&
+                    cobraInimiga.rastro[i].x === cabecaJogador.x &&
+                    cobraInimiga.rastro[i].y === cabecaJogador.y) {
+                    
+                    //Ganha 1, ela perde 1
+                    tail++;
+                    gameState.pontuacao += 1;
+                    gameState.atualizarPontuacao();
+                    
+                    if (cobraInimiga.tail > 1) cobraInimiga.tail--;
+                }
+            }
+            
+            //Se a cabeça da inimiga colidir com o corpo do jogador
+            for (let i = 0; i < rastro.length - 1; i++) {
+                if (rastro[i].x === cabecaInimiga.x && rastro[i].y === cabecaInimiga.y) {
+                    
+                    //Jogador perde 1, ela ganha 1
+                    if (tail > 1) tail--;
+                    cobraInimiga.tail++;
+                }
+            }
+        }
+        
+        //verifica se a cobra inimiga pegou a maça
+        function checarColisaoCobraInimigaEMaca() {
+            const colidiuComCobra = (
+                maca.x === cobraInimiga.pos.x &&
+                maca.y === cobraInimiga.pos.y
+            );
+            
+            if (colidiuComCobra) {
+                cobraInimiga.tail++;
+                posicaoMaca();
             }
         }
         
@@ -403,6 +579,29 @@ window.onload = function () {
             }
         }
         
+        //desenha olhos da cobrinha inimga
+        function desenhaOlhosInimiga() {
+            if (!cobraInimiga.ativa) return;
+            
+            const cabeca = cobraInimiga.rastro[cobraInimiga.rastro.length - 1];
+            if (!cabeca) return;
+            
+            ctx.fillStyle = 'black';
+            ctx.fillRect(
+                (cabeca.x + 0.25) * tamanhoDaPeca,
+                (cabeca.y + 0.25) * tamanhoDaPeca,
+                tamanhoDaPeca / 4,
+                tamanhoDaPeca / 4
+            );
+            
+            ctx.fillRect(
+                (cabeca.x + 0.75) * tamanhoDaPeca,
+                (cabeca.y + 0.25) * tamanhoDaPeca,
+                tamanhoDaPeca / 4,
+                tamanhoDaPeca / 4
+            );
+        }
+                
         //desenha lingua
         function desenhaLingua(){
             if (rastro.length > 0) {
@@ -455,6 +654,7 @@ window.onload = function () {
             // Retorna true se a distância for menor que o raio
             return distancia < raio;
         }
+        
         
         //verifica colisao da cobra e aura com a maca
         function verificaColisaoCobraOuAuraComMaca() {
@@ -529,6 +729,7 @@ window.onload = function () {
                 }, 15000);
             }
         }
+        
         // === INICIA AUTOMATICAMENTE ===
         gameState.initUI();
         if(!gameState.perdeu){
@@ -540,6 +741,8 @@ window.onload = function () {
         desenhaGrade();
         desenhaCobra();
         desenhaOlhos();
+        desenhaCobraInimiga();
+        desenhaOlhosInimiga();
         desenhaLingua();
         desenhaRastro();
         desenhaMaca();
@@ -549,6 +752,9 @@ window.onload = function () {
         // === DETECÇÃO DE COLISÕES ===
         verificaColisaoCobraOuAuraComMaca();
         verificaColisaoCobraEPoder();
+        atualizarCobraInimiga();
+        checarColisaoComCobraInimiga();
+        checarColisaoCobraInimigaEMaca();
         
         // === CONFIGURACOES ===
         gameState.configurarBotoes();
