@@ -1,50 +1,63 @@
-//controle pc
 export function controlePc(event, gameState) {
   switch (event.keyCode) {
-    case 37:
-      gameState.vel.x = -gameState.velocidade;
-      gameState.vel.y = 0;
+    case 37: // esquerda
+      if (gameState.ultimaDirecao.x !== gameState.velocidade) {
+        gameState.vel.x = -gameState.velocidade;
+        gameState.vel.y = 0;
+      }
       break;
-    case 38:
-      gameState.vel.y  = -gameState.velocidade;
-      gameState.vel.x = 0;
+    case 38: // cima
+      if (gameState.ultimaDirecao.y !== gameState.velocidade) {
+        gameState.vel.y = -gameState.velocidade;
+        gameState.vel.x = 0;
+      }
       break;
-    case 39:
-      gameState.vel.x = gameState.velocidade;
-      gameState.vel.y = 0;
+    case 39: // direita
+      if (gameState.ultimaDirecao.x !== -gameState.velocidade) {
+        gameState.vel.x = gameState.velocidade;
+        gameState.vel.y = 0;
+      }
       break;
-    case 40:
-      gameState.vel.y = gameState.velocidade;
-      gameState.velX = 0;
-      break;
-    default:
+    case 40: // baixo
+      if (gameState.ultimaDirecao.y !== -gameState.velocidade) {
+        gameState.vel.y = gameState.velocidade;
+        gameState.vel.x = 0;
+      }
       break;
   }
 }
 
-//controle mobile
+
 export function controleMobile(gameState) {
   document.querySelector("#cima").addEventListener('touchstart', () => {
-    gameState.vel.y = -gameState.velocidade;
-    gameState.vel.x = 0;
+    if (gameState.ultimaDirecao.y !== gameState.velocidade) {
+      gameState.vel.y = -gameState.velocidade;
+      gameState.vel.x = 0;
+    }
     navigator.vibrate?.(30);
-  }, false);
+  });
   
   document.querySelector("#baixo").addEventListener('touchstart', () => {
-    gameState.vel.y = gameState.velocidade;
-    gameState.vel.x = 0;
+    if (gameState.ultimaDirecao.y !== -gameState.velocidade) {
+      gameState.vel.y = gameState.velocidade;
+      gameState.vel.x = 0;
+    }
     navigator.vibrate?.(30);
-  }, false);
+  });
   
   document.querySelector("#esquerda").addEventListener('touchstart', () => {
-    gameState.vel.x = -gameState.velocidade;
-    gameState.vel.y = 0;
+    if (gameState.ultimaDirecao.x !== gameState.velocidade) {
+      gameState.vel.x = -gameState.velocidade;
+      gameState.vel.y = 0;
+    }
     navigator.vibrate?.(30);
-  }, false);
+  });
   
   document.querySelector("#direita").addEventListener('touchstart', () => {
-    gameState.vel.x = gameState.velocidade;
-    gameState.vel.y = 0;
+    if (gameState.ultimaDirecao.x !== -gameState.velocidade) {
+      gameState.vel.x = gameState.velocidade;
+      gameState.vel.y = 0;
+    }
     navigator.vibrate?.(30);
-  }, false);
+  });
 }
