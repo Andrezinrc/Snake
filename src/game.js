@@ -32,7 +32,7 @@ window.onload = function () {
         maca: { x: 10, y: 10 },
         poder: { x: 20, y: 20},
         rastro: [],
-        tail: 5,
+        tail: 1,
         temPoder: false,
         pontuacao: 0,
         ultimaPontuacaoVerificada: 0,
@@ -265,14 +265,14 @@ window.onload = function () {
         
         //particulas de efeito de colisao
         function explodirParticulas(x, y, cor) {
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 10; i++) {
                 particulas.push({
                     x: x,
                     y: y,
                     dx: (Math.random() - 0.5) * 6,
                     dy: (Math.random() - 0.5) * 6,
                     alpha: 1,
-                    size: Math.random() * 2 + 1,
+                    size: Math.random() * 0.8 + 0.2,
                     cor: cor,
                     life: Math.random() * 40 + 60
                 });
