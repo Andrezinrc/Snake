@@ -220,20 +220,22 @@ window.onload = function () {
         
         // === ANBIENTE DO JOGO ===
         
-        
+        //desenha tanbuleiro do jogo
         function desenhaTabuleiro() {
             ctx.clearRect(0, 0, gameState.canvas.width, gameState.canvas.height);
             gameState.mensagem_perdeu.style.display = "none";
             
             gameState.canvas.width = 350;
             gameState.canvas.height = 350;
-            
-            // background tabuleiro
-            ctx.fillStyle = "#000000";
+        
+            ctx.fillStyle = "#0f0f1a";
             ctx.fillRect(0, 0, gameState.canvas.width, gameState.canvas.height);
-            gameState.canvas.style.opacity = 0.8;
+            gameState.canvas.style.opacity = 0.9;
             
-            // movimentacao e teletransporte
+            desenharGrade();
+            desenharPixelsVivos();
+            
+            // movimentação e teletransporte
             pos.x += vel.x;
             pos.y += vel.y;
             
@@ -243,31 +245,39 @@ window.onload = function () {
             if (pos.y > quantidadeDePeca - 1) pos.y = 0;
             
             cobraInimiga.pos.x = Math.max(0, Math.min(quantidadeDePeca - 1, cobraInimiga.pos.x));
-                cobraInimiga.pos.y = Math.max(0, Math.min(quantidadeDePeca - 1, cobraInimiga.pos.y));
+            cobraInimiga.pos.y = Math.max(0, Math.min(quantidadeDePeca - 1, cobraInimiga.pos.y));
         }
         
         // desenha grade do tabuleiro
-        function desenhaGrade() {;
-            
-            // Linhas da grade
-            ctx.strokeStyle = "#2b2b2b";
+        function desenharGrade() {
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
             ctx.lineWidth = 1;
             
-            for (var x = 0; x < gameState.canvas.width; x += tamanhoDaPeca) {
+            for (let x = 0; x < gameState.canvas.width; x += tamanhoDaPeca) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, gameState.canvas.height);
                 ctx.stroke();
             }
             
-            for (var y = 0; y < gameState.canvas.height; y += tamanhoDaPeca) {
+            for (let y = 0; y < gameState.canvas.height; y += tamanhoDaPeca) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(gameState.canvas.width, y);
                 ctx.stroke();
             }
         }
-        
+            
+        //desenha efeitos de chuvisco
+        function desenharPixelsVivos() {
+            for (let i = 0; i < 25; i++) {
+                const x = Math.floor(Math.random() * gameState.canvas.width);
+                const y = Math.floor(Math.random() * gameState.canvas.height);
+                const brilho = Math.random() * 0.4 + 0.1;
+                ctx.fillStyle = `rgba(155, 89, 255, ${brilho})`;
+                ctx.fillRect(x, y, 1, 1);
+            }
+        }
         
         // === COBRINHA JOGADOR  ===
         
@@ -873,7 +883,6 @@ window.onload = function () {
         
         // === RENDERIZAÇÃO ===
         desenhaTabuleiro();
-        desenhaGrade();
         desenhaCobra();
         desenhaOlhos();
         desenhaCobraInimiga();

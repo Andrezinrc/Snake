@@ -45,12 +45,16 @@
         width: 65px;
         height: 65px;
         transition: all 0.3s ease;
-        background-color: #f5f5f5;
-        color: #333;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        border: 1px solid #ccc;
+        background-color: #1e1e2f;
+        color: #9B59FF;
+        border: 1px solid #9B59FF;
         border-radius: 8px;
-        font-size: 40px;
+        font-family: 'monospace';
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 14px;
+        padding: 10px 20px;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -64,10 +68,8 @@
     }
 
     #cima:hover, #baixo:hover, #esquerda:hover, #direita:hover {
-        background-color: #e0e0e0;
-        border-color: #bbb;
-        cursor: pointer;
-        transform: scale(1.02); 
+        background-color: #2c2c3e;
+        color: #ffffff;
     }
 
     #cima {
