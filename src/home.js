@@ -3,7 +3,27 @@ document.addEventListener("DOMContentLoaded", function() {
     let menu = document.getElementById("menu");
     let overlay = document.querySelector(".overlay");
     const body = document.body;
+    const canvas = document.getElementById("homeCanvas");
+    const ctx = canvas.getContext("2d");
     
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    ctx.fillStyle = "#0f0f1a";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    canvas.style.opacity = .9;
+    
+    
+    function desenharPixelsVivos() {
+        for (let i = 0; i < 25; i++) {
+            const x = Math.floor(Math.random() * canvas.width);
+            const y = Math.floor(Math.random() * canvas.height);
+            const brilho = Math.random() * 0.4 + 0.1;
+            ctx.fillStyle = `rgba(155, 89, 255, ${brilho})`;
+            ctx.fillRect(x, y, 1, 1);
+        }
+    }
+    desenharPixelsVivos();
     // Botão menu
     if (btnMenu) {
         btnMenu.addEventListener("click", () => {
