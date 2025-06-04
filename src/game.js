@@ -1,8 +1,154 @@
 import { controlePc, controleMobile } from "./controles.js";
 
+<<<<<<< HEAD
 const gameState = {
     canvas: document.querySelector("#gameCanvas"),
     ctx: null,
+=======
+//inicia o jogo
+window.onload = function () {
+    
+    const gameState = {
+        canvas: document.querySelector("#gameCanvas"),
+        ctx: null,
+        
+        //Elementos da interface
+        container: document.querySelector(".container"),
+        mensagem_perdeu: document.getElementById("voce-perdeu"),
+        botoes: document.getElementById("botoes"),
+        pausar: document.getElementById("pausar"),
+        continuar: document.getElementById("continuar"),
+        jogarNovamente: document.getElementById("jogar-novamente"),
+        sair: document.getElementById("sair"),
+        
+        //Inicializa o contexto do canvas
+        init() {
+            this.ctx = this.canvas.getContext("2d");
+        },
+        
+        // Parâmetros do jogo
+        tamanhoDaPeca: 10,
+        quantidadeDePeca: 35,
+        velocidade: 1,
+        tempoVelocidade: 105,
+        tempoVelocidadeInimiga: 120,
+        pos: { x: 5, y: 5 },
+        vel: { x: 1, y: 0 },
+        ultimaDirecao: { x: 0, y: 0 },
+        velAnterior: { x: null, y: null },
+        maca: { x: 10, y: 10 },
+        poder: { x: 20, y: 20},
+        rastro: [],
+        tail: 1,
+        temPoder: false,
+        pontuacao: 0,
+        ultimaPontuacaoVerificada: 0,
+        dificuldadeAtual: 0,
+        cobraVerde: true,
+        tempo: 0,
+        poderTempo: 0,
+        jogoPausado: false,
+        ultimoFrame: 0,
+        particulas: [],
+        contagem: null,
+        movimenta: null,
+        poderVisivel: true,
+        tongueVisible: true,
+        perdeu: false,
+        
+        //funções relacionadas a interface
+        initUI() {
+            this.container = document.querySelector(".container"),
+            this.mensagem_perdeu = document.getElementById("voce-perdeu");
+            this.pausar = document.getElementById("pausar");
+            this.continuar = document.getElementById("continuar");
+            this.sair = document.getElementById("sair");
+            this.jogarNovamente = document.getElementById("jogarNovamente");
+            this.voltar = document.getElementById("voltar");
+        },
+        
+        // atualiza o tempo na interface
+        contarTempo() {
+            if (this.contagem !== null) clearInterval(this.contagem);
+            this.contagem = setInterval(this.contarTempo, 1000)
+            this.tempo += 1;
+            document.getElementById("tempo").textContent = this.tempo;
+        },
+                
+       atualizarPontuacao() {
+            const bits = this.pontuacao;
+            const bytes = Math.floor(bits / 8);
+            const extra = bits % 8;
+            
+            let texto = `${bytes}B`;
+            if (extra > 0) texto += ` +${extra}b`;
+            
+            document.getElementById("pontuacao").textContent = texto;
+        },
+        
+        // controle de pausa e continuação
+        pausarJogo() {
+            this.jogoPausado = true;
+            this.velAnterior.x = this.vel.x;
+            this.velAnterior.y = this.vel.y;
+            clearInterval(this.movimenta);
+            clearInterval(this.contagem);
+            botoes.style.display = "none";
+            continuar.style.display = "block";
+            sair.style.display = "block";
+            pausar.style.display = "none";
+            this.mensagem_perdeu.style.display = "none";
+        },
+        
+        continuarJogo() {
+            if (!this.jogoPausado) return;
+            this.jogoPausado = false;
+            
+            this.ultimoFrame = performance.now();
+            
+            this.vel.x = this.velAnterior.x;
+            this.vel.y = this.velAnterior.y;
+            
+            console.log('velXAnterior:', this.velAnterior.x, 'velYAnterior:', this.velAnterior.y);
+            
+            this.movimenta = setInterval(meuGame, this.tempoVelocidade);
+            this.contagem = setInterval(this.contarTempo.bind(this), 200);
+            botoes.style.display = "block";
+            pausar.style.display = "block";
+            continuar.style.display = "none";
+            sair.style.display = "none";
+            pausar.style.paddingLeft = "8px";
+            pausar.style.paddingTop = "4px";
+            jogarNovamente.style.display = "none";
+            voltar.style.display = "none";
+            this.mensagem_perdeu.style.display = "none";
+        },
+        
+        //game over
+        gameOver() {
+            this.vel.x = 0;
+            this.vel.y = 0;
+            this.tail = 5;
+            this.perdeu = true;
+            this.mensagem_perdeu.style.display = "block";
+            this.pausar.style.display = "none";
+            this.botoes.style.display = "none";
+            this.jogarNovamente.style.display = "block";
+            this.voltar.style.display = "block";
+        
+            clearInterval(this.contagem);
+        },
+        
+        //configuração dos botões
+        configurarBotoes() {
+            this.pausar.addEventListener("click", () => {
+                this.pausarJogo();
+            });
+            
+            this.continuar.addEventListener("click", () => {
+                this.continuarJogo();
+            });
+>>>>>>> e7f93f05f9992080fab26339d69517969ceae4ab
     
     //Elementos da interface
     container: document.querySelector(".container"),
@@ -14,6 +160,7 @@ const gameState = {
     sair: document.getElementById("sair"),
     
     //Inicializa o contexto do canvas
+<<<<<<< HEAD
     init() {
         this.ctx = this.canvas.getContext("2d");
     },
@@ -67,6 +214,92 @@ const gameState = {
     // Atualiza o tempo na interface com contagem regressiva
     contarTempo() {
         console.log("iniciou");
+=======
+    gameState.init();
+    
+    
+    // desestruturação de variáveis para leitura fácil
+    let {
+        ctx,
+        tamanhoDaPeca,
+        quantidadeDePeca,
+        velocidade,
+        pos,
+        vel,
+        velAnterior,
+        maca,
+        poder,
+        rastro,
+        tail,
+        temPoder,
+        cobraVerde,
+        tempo,
+        jogoPausado,
+        ultimoFrame,
+        particulas,
+        movdimenta,
+        poderVisivel,
+        perdeu
+    } = gameState;
+    
+    let alvo;
+    let delayInimiga = 0;
+    const intervaloIA = 5;
+    let tempoUltimoMovInimiga = 0;
+    let cobraInimigaRespawnTimer = null;
+    let ultimaPosicao = null;
+    let feedbackInimiga = { ativo: false, texto: "+1", x: 0, y: 0, cor: "red" };
+    let feedbackJogador = { ativo: false, texto: "-1", x: 0, y: 0, cor: "#00ff88" };
+    
+   //estado da cobra inimiga
+   let cobraInimiga = {
+        pos: { x: Math.floor(Math.random() * quantidadeDePeca), y: Math.floor(Math.random() * quantidadeDePeca) },
+        vel: { x: 0, y: 0 },
+        velAnterior: { x: null, y: null },
+        rastro: [],
+        tail: 5,
+        cor: "#ff0033",
+        ativa: true,
+        morta: false
+    };
+    
+    
+    //funcao do jogo
+    var meuGame = () => {
+        if (jogoPausado) return;
+        console.log("Game rodando", vel.x,vel.y);
+        
+        
+        // === ANBIENTE DO JOGO ===
+        
+        //desenha tanbuleiro do jogo
+        function desenhaTabuleiro() {
+            ctx.clearRect(0, 0, gameState.canvas.width, gameState.canvas.height);
+            gameState.mensagem_perdeu.style.display = "none";
+            
+            gameState.canvas.width = 350;
+            gameState.canvas.height = 350;
+        
+            ctx.fillStyle = "#0f0f1a";
+            ctx.fillRect(0, 0, gameState.canvas.width, gameState.canvas.height);
+            gameState.canvas.style.opacity = 0.9;
+            
+            desenharGrade();
+            desenharPixelsVivos();
+            
+            // movimentação e teletransporte
+            pos.x += vel.x;
+            pos.y += vel.y;
+            
+            if (pos.x < 0) pos.x = quantidadeDePeca - 1;
+            if (pos.x > quantidadeDePeca - 1) pos.x = 0;
+            if (pos.y < 0) pos.y = quantidadeDePeca - 1;
+            if (pos.y > quantidadeDePeca - 1) pos.y = 0;
+            
+            cobraInimiga.pos.x = Math.max(0, Math.min(quantidadeDePeca - 1, cobraInimiga.pos.x));
+            cobraInimiga.pos.y = Math.max(0, Math.min(quantidadeDePeca - 1, cobraInimiga.pos.y));
+        }
+>>>>>>> e7f93f05f9992080fab26339d69517969ceae4ab
         
         // Limpa qualquer intervalo anterior
         if (this.contagem) {
@@ -408,6 +641,7 @@ var meuGame = () => {
             
             ctx.fillStyle = corOriginal;
         }
+<<<<<<< HEAD
     }
     
     
@@ -451,6 +685,15 @@ var meuGame = () => {
                 if (!isCabeca) {
                     ctx.fillStyle = "#9B59FF";
                     ctx.font = "bold 10px monospace";
+=======
+        
+        //desenha cobrinha inimiga
+        function desenhaCobraInimiga() {
+            if (cobraInimiga.ativa) {
+                for (let i = 0; i < cobraInimiga.rastro.length; i++) {
+                    const x = cobraInimiga.rastro[i].x * tamanhoDaPeca;
+                    const y = cobraInimiga.rastro[i].y * tamanhoDaPeca;
+>>>>>>> e7f93f05f9992080fab26339d69517969ceae4ab
                     
                     const bit = Math.random() > 0.5 ? "1" : "0";
                     
@@ -828,6 +1071,7 @@ var meuGame = () => {
             ctx.fillText(feedbackJogador.texto, feedbackJogador.x, feedbackJogador.y);
         }
         
+<<<<<<< HEAD
         if (feedbackInimiga.ativo) {
             ctx.fillStyle = feedbackInimiga.cor;
             ctx.font = "bold 12px monospace";
@@ -905,6 +1149,105 @@ var meuGame = () => {
                             feedbackJogador.ativo = false;
                             feedbackInimiga.ativo = false;
                         }, 500);
+=======
+    
+        function desenharTimerRespawn() {
+            if (!cobraInimiga.ativa && cobraInimigaRespawnTimer) {
+                const tempoRestante = Math.ceil((cobraInimigaRespawnTimer - Date.now()) / 1000);
+                if (tempoRestante > 0) {
+                    ctx.fillStyle = "red";
+                    ctx.font = "bold 14px monospace";
+                    ctx.fillText(`⚠ Inimiga volta em ${tempoRestante}s`, 10, 20);
+                }
+            }
+        }
+        
+        // desenha o feedback visual de ganho e perda
+        function desenharFeedback() {
+            if (feedbackJogador.ativo) {
+                ctx.fillStyle = feedbackJogador.cor;
+                ctx.font = "bold 12px monospace";
+                ctx.fillText(feedbackJogador.texto, feedbackJogador.x, feedbackJogador.y);
+            }
+            
+            if (feedbackInimiga.ativo) {
+                ctx.fillStyle = feedbackInimiga.cor;
+                ctx.font = "bold 12px monospace";
+                ctx.fillText(feedbackInimiga.texto, feedbackInimiga.x, feedbackInimiga.y);
+            }
+        }
+                        
+        //colisao da cobrinha inimiga com jogador e feedback visual
+        function checarColisaoComCobraInimiga() {
+            const cabecaInimiga = cobraInimiga.rastro[cobraInimiga.rastro.length - 1];
+            const cabecaJogador = rastro[rastro.length - 1];
+            
+            //se jogador colidir com rastro da cobrinha inimiga +1 e jogador -1
+            if (!cobraInimiga.morta) {
+                for (let i = 0; i < cobraInimiga.rastro.length - 1; i++) {
+                    if (
+                        rastro.length > 0 &&
+                        cobraInimiga.rastro[i].x === cabecaJogador.x &&
+                        cobraInimiga.rastro[i].y === cabecaJogador.y
+                    ) {
+                        // Jogador ganha 1, inimiga perde 1
+                        tail++;
+                        gameState.pontuacao += 1;
+                        gameState.atualizarPontuacao();
+                        
+                        if (cobraInimiga.tail > 1) cobraInimiga.tail--;
+                        
+                        // feedback jogador +1
+                        feedbackJogador.ativo = true;
+                        feedbackJogador.texto = "+1";
+                        feedbackJogador.x = cabecaJogador.x * tamanhoDaPeca + 10;
+                        feedbackJogador.y = cabecaJogador.y * tamanhoDaPeca - 4;
+                        
+                        //feedback inimiga -1
+                        feedbackInimiga.ativo = true;
+                        feedbackInimiga.texto = "-1";
+                        feedbackInimiga.x = cabecaInimiga.x * tamanhoDaPeca + 10;
+                        feedbackInimiga.y = cabecaInimiga.y * tamanhoDaPeca - 4;
+                        
+                        setTimeout(() => {
+                            feedbackJogador.ativo = false;
+                            feedbackInimiga.ativo = false;
+                        }, 500);
+                    }
+                }
+            }
+            
+            //se cobrinha inimiga colidir com rastro do jogador ganha +1 e cobrinha inimiga  -1
+            if (!temPoder) {
+                for (let i = 0; i < rastro.length - 1; i++) {
+                    if (
+                        rastro[i].x === cabecaInimiga.x &&
+                        rastro[i].y === cabecaInimiga.y
+                    ) {
+                        if (!cobraInimiga.morta) {
+                            if (tail > 1) tail--;
+                            cobraInimiga.tail++;
+                            gameState.pontuacao -= 1;
+                            gameState.atualizarPontuacao();
+                            
+                            // Feedback jogador -1
+                            feedbackJogador.ativo = true;
+                            feedbackJogador.texto = "-1";
+                            feedbackJogador.x = cabecaJogador.x * tamanhoDaPeca + 10;
+                            feedbackJogador.y = cabecaJogador.y * tamanhoDaPeca - 4;
+                            
+                            // Feedback inimiga +1
+                            feedbackInimiga.ativo = true;
+                            feedbackInimiga.texto = "+1";
+                            feedbackInimiga.x = cabecaInimiga.x * tamanhoDaPeca + 10;
+                            feedbackInimiga.y = cabecaInimiga.y * tamanhoDaPeca - 4;
+                            
+                            setTimeout(() => {
+                                feedbackJogador.ativo = false;
+                                feedbackInimiga.ativo = false;
+                            }, 500);
+                        }
+>>>>>>> e7f93f05f9992080fab26339d69517969ceae4ab
                     }
                 }
             }
@@ -916,6 +1259,7 @@ var meuGame = () => {
     function verificarColisaoInimigoComMaca() {
         const cabecaInimiga = cobraInimiga.rastro[cobraInimiga.rastro.length - 1];
         
+<<<<<<< HEAD
         if (cobraInimiga.pos.x === maca.x && cobraInimiga.pos.y === maca.y) {
             cobraInimiga.tail++;
             posicaoMaca();
@@ -960,12 +1304,43 @@ var meuGame = () => {
             
             const rx = maca.x * tamanhoDaPeca;
             const ry = maca.y * tamanhoDaPeca;
+=======
+        //verifica se o inimigo pegou a maca
+        function verificarColisaoInimigoComMaca() {
+            const cabecaInimiga = cobraInimiga.rastro[cobraInimiga.rastro.length - 1];
+            
+            if (cobraInimiga.pos.x === maca.x && cobraInimiga.pos.y === maca.y) {
+                cobraInimiga.tail++;
+                posicaoMaca();
+                
+                //feedback +1
+                feedbackInimiga.ativo = true;
+                feedbackInimiga.texto = "+1";
+                feedbackInimiga.x = cabecaInimiga.x * tamanhoDaPeca + 10;
+                feedbackInimiga.y = cabecaInimiga.y * tamanhoDaPeca - 4;
+                
+                setTimeout(() => {
+                    feedbackJogador.ativo = false;
+                    feedbackInimiga.ativo = false;
+                }, 500);
+                
+                console.log("Inimigo pegou a maçã");
+            }
+        }
+    
+        // Verifica se um círculo colidiu com um retângulo
+        function colisaoCirculoRetangulo(cx, cy, raio, rx, ry, largura, altura) {
+            const testeX = Math.max(rx, Math.min(cx, rx + largura));
+            const testeY = Math.max(ry, Math.min(cy, ry + altura));
+            const distancia = Math.hypot(cx - testeX, cy - testeY);
+>>>>>>> e7f93f05f9992080fab26339d69517969ceae4ab
             
             if (colisaoCirculoRetangulo(cx, cy, raioAura, rx, ry, tamanhoDaPeca, tamanhoDaPeca)) {
                 colidiuComAura = true;
             }
         }
         
+<<<<<<< HEAD
         // verifica colisao cobrinha normal e cobrinha com aura
         if (colidiuComCobra || colidiuComAura) {
             if (colidiuComAura) {
@@ -975,6 +1350,13 @@ var meuGame = () => {
                     "#00ff88"
                 );
             }
+=======
+        
+        //verifica colisao da cobra e aura com a maca
+        function verificaColisaoCobraOuAuraComMaca() {
+            // colisao cobra e maça sem poder
+            const colidiuComCobra = (maca.x === pos.x && maca.y === pos.y);
+>>>>>>> e7f93f05f9992080fab26339d69517969ceae4ab
             
             tail++;
             posicaoMaca();
@@ -993,6 +1375,7 @@ var meuGame = () => {
                 
                 setTimeout(() => feedbackJogador.ativo = false, 800);
             }
+<<<<<<< HEAD
             gameState.atualizarPontuacao();
         }
     }
@@ -1005,11 +1388,24 @@ var meuGame = () => {
             //ativa e remove poder
             if (!temPoder) {
                 temPoder = true;
+=======
+            
+            // verifica colisao cobrinha normal e cobrinha com aura
+            if (colidiuComCobra || colidiuComAura) {
+                if (colidiuComAura) {
+                    explodirParticulas(
+                        maca.x * tamanhoDaPeca + tamanhoDaPeca / 2,
+                        maca.y * tamanhoDaPeca + tamanhoDaPeca / 2,
+                        "#00ff88"
+                    );
+                }
+>>>>>>> e7f93f05f9992080fab26339d69517969ceae4ab
                 
                 setTimeout(function() {
                     temPoder = false;
                 }, 7000);
                 
+<<<<<<< HEAD
                 //mostr o tempo  restante do poder
                 gameState.poderTempo = 7;
                 
@@ -1022,6 +1418,23 @@ var meuGame = () => {
                         }
                     }, 1000 * i);
                 }
+=======
+                gameState.pontuacao += 1;
+                gameState.atualizarPontuacao();
+                
+                // mostrar +1 verde com feedback Jogador, só se NÃO estiver com poder
+                if (!temPoder) {
+                    feedbackJogador.ativo = true;
+                    feedbackJogador.texto = "+1";
+                    feedbackJogador.cor = "#00ff88";
+                    
+                    feedbackJogador.x = pos.x * tamanhoDaPeca + 10;
+                    feedbackJogador.y = pos.y * tamanhoDaPeca - 4;
+                    
+                    setTimeout(() => feedbackJogador.ativo = false, 800);
+                }
+                gameState.atualizarPontuacao();
+>>>>>>> e7f93f05f9992080fab26339d69517969ceae4ab
             }
             
             // espera para atualizar a nova posiçao da maça
@@ -1099,6 +1512,7 @@ var meuGame = () => {
         
         poderVisivel = true;
         desenharPoder();
+<<<<<<< HEAD
     }
     
     
@@ -1139,6 +1553,21 @@ var meuGame = () => {
     gameState.configurarBotoes();
     gameState.configurarControles();
 };
+=======
+        desenharFeedback();
+        
+        // === DETECÇÃO DE COLISÕES ===
+        verificaColisaoCobraOuAuraComMaca();
+        verificaColisaoCobraEPoder();
+        atualizarCobraInimiga();
+        checarColisaoComCobraInimiga();
+        verificarColisaoInimigoComMaca();
+        
+        // === CONFIGURACOES ===
+        gameState.configurarBotoes();
+        gameState.configurarControles();
+    };
+>>>>>>> e7f93f05f9992080fab26339d69517969ceae4ab
 
 // === GAME LOOP ===
 function gameLoop(agora) {
