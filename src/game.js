@@ -1120,7 +1120,7 @@ var meuGame = () => {
     
     // === RENDERIZAÇÃO ===
     desenhaTabuleiro();
-    desenharTerminais(ctx, 1000);
+    desenharTerminais(ctx, gameState.tempo);
     desenhaCobra();
     desenhaOlhos();
     desenhaCobraInimiga();
