@@ -34,7 +34,7 @@ window.onload = function () {
         maca: { x: 10, y: 10 },
         poder: { x: 20, y: 20},
         rastro: [],
-        tail: 5,
+        tail: 1,
         temPoder: false,
         pontuacao: 0,
         ultimaPontuacaoVerificada: 0,
@@ -198,7 +198,8 @@ window.onload = function () {
     let tempoUltimoMovInimiga = 0;
     let cobraInimigaRespawnTimer = null;
     let ultimaPosicao = null;
-    
+    let feedbackInimiga = { ativo: false, texto: "+1", x: 0, y: 0, cor: "red" };
+    let feedbackJogador = { ativo: false, texto: "-1", x: 0, y: 0, cor: "#00ff88" };
     
    //estado da cobra inimiga
    let cobraInimiga = {
@@ -211,6 +212,7 @@ window.onload = function () {
         ativa: true,
         morta: false
     };
+    
     
     //funcao do jogo
     var meuGame = () => {
@@ -431,20 +433,6 @@ window.onload = function () {
                 tamanhoDaPeca / 4,
                 tamanhoDaPeca / 4
             );
-        }
-        
-        //desenha rastro cobra inimiga
-        function atualizaRastroInimiga() {
-            if (cobraInimiga.ativa) {
-                cobraInimiga.rastro.push({
-                    x: cobraInimiga.pos.x,
-                    y: cobraInimiga.pos.y
-                });
-            }
-            
-            while (cobraInimiga.rastro.length > cobraInimiga.tail) {
-                cobraInimiga.rastro.shift();
-            }
         }
         
         //desenha cobrinha inimiga
@@ -711,6 +699,7 @@ window.onload = function () {
             }
         }
         
+    
         function desenharTimerRespawn() {
             if (!cobraInimiga.ativa && cobraInimigaRespawnTimer) {
                 const tempoRestante = Math.ceil((cobraInimigaRespawnTimer - Date.now()) / 1000);
@@ -721,54 +710,120 @@ window.onload = function () {
                 }
             }
         }
-                
-        //colisao da cobrinha inimiga com jogador
+        
+        // desenha o feedback visual de ganho e perda
+        function desenharFeedback() {
+            if (feedbackJogador.ativo) {
+                ctx.fillStyle = feedbackJogador.cor;
+                ctx.font = "bold 12px monospace";
+                ctx.fillText(feedbackJogador.texto, feedbackJogador.x, feedbackJogador.y);
+            }
+            
+            if (feedbackInimiga.ativo) {
+                ctx.fillStyle = feedbackInimiga.cor;
+                ctx.font = "bold 12px monospace";
+                ctx.fillText(feedbackInimiga.texto, feedbackInimiga.x, feedbackInimiga.y);
+            }
+        }
+                        
+        //colisao da cobrinha inimiga com jogador e feedback visual
         function checarColisaoComCobraInimiga() {
             const cabecaInimiga = cobraInimiga.rastro[cobraInimiga.rastro.length - 1];
             const cabecaJogador = rastro[rastro.length - 1];
             
-            // Se jogador colidir com o corpo da inimiga
-            for (let i = 0; i < cobraInimiga.rastro.length - 1; i++) {
-                if (rastro.length > 0 &&
-                    cobraInimiga.rastro[i].x === cabecaJogador.x &&
-                    cobraInimiga.rastro[i].y === cabecaJogador.y) {
-                    
-                    //Ganha 1, ela perde 1
-                    tail++;
-                    gameState.pontuacao += 1;
-                    gameState.atualizarPontuacao();
-                    
-                    if (cobraInimiga.tail > 1) cobraInimiga.tail--;
+            //se jogador colidir com rastro da cobrinha inimiga +1 e jogador -1
+            if (!cobraInimiga.morta) {
+                for (let i = 0; i < cobraInimiga.rastro.length - 1; i++) {
+                    if (
+                        rastro.length > 0 &&
+                        cobraInimiga.rastro[i].x === cabecaJogador.x &&
+                        cobraInimiga.rastro[i].y === cabecaJogador.y
+                    ) {
+                        // Jogador ganha 1, inimiga perde 1
+                        tail++;
+                        gameState.pontuacao += 1;
+                        gameState.atualizarPontuacao();
+                        
+                        if (cobraInimiga.tail > 1) cobraInimiga.tail--;
+                        
+                        // feedback jogador +1
+                        feedbackJogador.ativo = true;
+                        feedbackJogador.texto = "+1";
+                        feedbackJogador.x = cabecaJogador.x * tamanhoDaPeca + 10;
+                        feedbackJogador.y = cabecaJogador.y * tamanhoDaPeca - 4;
+                        
+                        //feedback inimiga -1
+                        feedbackInimiga.ativo = true;
+                        feedbackInimiga.texto = "-1";
+                        feedbackInimiga.x = cabecaInimiga.x * tamanhoDaPeca + 10;
+                        feedbackInimiga.y = cabecaInimiga.y * tamanhoDaPeca - 4;
+                        
+                        setTimeout(() => {
+                            feedbackJogador.ativo = false;
+                            feedbackInimiga.ativo = false;
+                        }, 500);
+                    }
                 }
             }
             
-            if(!temPoder){
-                //Se a cabeça da inimiga colidir com o corpo do jogador
+            //se cobrinha inimiga colidir com rastro do jogador ganha +1 e cobrinha inimiga  -1
+            if (!temPoder) {
                 for (let i = 0; i < rastro.length - 1; i++) {
-                    if (rastro[i].x === cabecaInimiga.x && rastro[i].y === cabecaInimiga.y) {
-                        
-                        //Jogador perde 1, ela ganha 1
-                        if(!cobraInimiga.morta){
+                    if (
+                        rastro[i].x === cabecaInimiga.x &&
+                        rastro[i].y === cabecaInimiga.y
+                    ) {
+                        if (!cobraInimiga.morta) {
                             if (tail > 1) tail--;
-                                cobraInimiga.tail++;
-                                gameState.pontuacao -= 1;
+                            cobraInimiga.tail++;
+                            gameState.pontuacao -= 1;
+                            gameState.atualizarPontuacao();
+                            
+                            // Feedback jogador -1
+                            feedbackJogador.ativo = true;
+                            feedbackJogador.texto = "-1";
+                            feedbackJogador.x = cabecaJogador.x * tamanhoDaPeca + 10;
+                            feedbackJogador.y = cabecaJogador.y * tamanhoDaPeca - 4;
+                            
+                            // Feedback inimiga +1
+                            feedbackInimiga.ativo = true;
+                            feedbackInimiga.texto = "+1";
+                            feedbackInimiga.x = cabecaInimiga.x * tamanhoDaPeca + 10;
+                            feedbackInimiga.y = cabecaInimiga.y * tamanhoDaPeca - 4;
+                            
+                            setTimeout(() => {
+                                feedbackJogador.ativo = false;
+                                feedbackInimiga.ativo = false;
+                            }, 500);
                         }
                     }
                 }
             }
         }
         
+        //verifica se o inimigo pegou a maca
         function verificarColisaoInimigoComMaca() {
+            const cabecaInimiga = cobraInimiga.rastro[cobraInimiga.rastro.length - 1];
+            
             if (cobraInimiga.pos.x === maca.x && cobraInimiga.pos.y === maca.y) {
                 cobraInimiga.tail++;
                 posicaoMaca();
-                gameState.pontuacaoInimigo += 1;
+                
+                //feedback +1
+                feedbackInimiga.ativo = true;
+                feedbackInimiga.texto = "+1";
+                feedbackInimiga.x = cabecaInimiga.x * tamanhoDaPeca + 10;
+                feedbackInimiga.y = cabecaInimiga.y * tamanhoDaPeca - 4;
+                
+                setTimeout(() => {
+                    feedbackJogador.ativo = false;
+                    feedbackInimiga.ativo = false;
+                }, 500);
                 
                 console.log("Inimigo pegou a maçã");
             }
         }
-        
-        
+    
         // Verifica se um círculo colidiu com um retângulo
         function colisaoCirculoRetangulo(cx, cy, raio, rx, ry, largura, altura) {
             const testeX = Math.max(rx, Math.min(cx, rx + largura));
@@ -782,7 +837,7 @@ window.onload = function () {
         
         //verifica colisao da cobra e aura com a maca
         function verificaColisaoCobraOuAuraComMaca() {
-            //colisao cobra e maça sem poder
+            // colisao cobra e maça sem poder
             const colidiuComCobra = (maca.x === pos.x && maca.y === pos.y);
             
             let colidiuComAura = false;
@@ -799,9 +854,8 @@ window.onload = function () {
                 }
             }
             
-            //verifica colisao cobrinha normal e cobrinha com aura
+            // verifica colisao cobrinha normal e cobrinha com aura
             if (colidiuComCobra || colidiuComAura) {
-                //aplica colisao especial
                 if (colidiuComAura) {
                     explodirParticulas(
                         maca.x * tamanhoDaPeca + tamanhoDaPeca / 2,
@@ -814,9 +868,19 @@ window.onload = function () {
                 posicaoMaca();
                 
                 gameState.pontuacao += 1;
+                gameState.atualizarPontuacao();
                 
-                document.getElementById("pontuacao").innerHTML = "Pontuação: " +
-                    gameState.pontuacao;
+                // mostrar +1 verde com feedback Jogador, só se NÃO estiver com poder
+                if (!temPoder) {
+                    feedbackJogador.ativo = true;
+                    feedbackJogador.texto = "+1";
+                    feedbackJogador.cor = "#00ff88";
+                    
+                    feedbackJogador.x = pos.x * tamanhoDaPeca + 10;
+                    feedbackJogador.y = pos.y * tamanhoDaPeca - 4;
+                    
+                    setTimeout(() => feedbackJogador.ativo = false, 800);
+                }
                 gameState.atualizarPontuacao();
             }
         }
@@ -893,6 +957,7 @@ window.onload = function () {
         desenhaMaca();
         desenharParticulas();
         desenharPoder();
+        desenharFeedback();
         
         // === DETECÇÃO DE COLISÕES ===
         verificaColisaoCobraOuAuraComMaca();
