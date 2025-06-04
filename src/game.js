@@ -121,6 +121,10 @@ const gameState = {
         this.jogoPausado = true;
         this.velAnterior.x = this.vel.x;
         this.velAnterior.y = this.vel.y;
+        
+        this.ultimaDirecao.x = this.vel.x;
+        this.ultimaDirecao.y = this.vel.y;
+        
         clearInterval(this.movimenta);
         clearInterval(this.contagem);
         botoes.style.display = "none";
@@ -132,6 +136,12 @@ const gameState = {
     
     continuarJogo() {
         if (!this.jogoPausado) return;
+        
+        console.log('Antes de continuar:', {
+            vel: { x: this.vel.x, y: this.vel.y },
+            velAnterior: { x: this.velAnterior.x, y: this.velAnterior.y },
+            ultimaDirecao: { x: this.ultimaDirecao.x, y: this.ultimaDirecao.y }
+        });
         
         this.jogoPausado = false;
         
@@ -167,7 +177,7 @@ const gameState = {
         this.ganhou = true;
         this.mensagem_final.style.display = "block";
         this.mensagem_final.style.color = "green";
-        document.getElementById("mensagem-final").innerText = "Voce Ganhou!";
+        document.getElementById("mensagem-final").innerText = "Você ganhou!";
         this.pausar.style.display = "none";
         this.botoes.style.display = "none";
         this.jogarNovamente.style.display = "block";
@@ -189,7 +199,7 @@ const gameState = {
         this.tail = 5;
         this.perdeu = true;
         this.mensagem_final.style.display = "block";
-        document.getElementById("mensagem-final").innerText = "Voce Perdeu";
+        document.getElementById("mensagem-final").innerText = "Você perdeu!";
         this.pausar.style.display = "none";
         this.botoes.style.display = "none";
         this.jogarNovamente.style.display = "block";
@@ -264,6 +274,10 @@ var meuGame = () => {
     if (gameState.jogoPausado) return;
     console.log("Game rodando", gameState.vel.x, gameState.vel.y);
     
+    //garante que a última direção registrada seja igual à velocidade atual,
+    // evitando que o jogador faça movimentos reversos
+    gameState.ultimaDirecao.x = gameState.vel.x;
+    gameState.ultimaDirecao.y = gameState.vel.y;
     
     // === ANBIENTE DO JOGO ===
     
@@ -1120,7 +1134,7 @@ var meuGame = () => {
     
     // === RENDERIZAÇÃO ===
     desenhaTabuleiro();
-    desenharTerminais(ctx, gameState.tempo);
+    desenharTerminais(ctx, 1000);
     desenhaCobra();
     desenhaOlhos();
     desenhaCobraInimiga();
@@ -1150,11 +1164,7 @@ var meuGame = () => {
 // === GAME LOOP ===
 function gameLoop(agora) {
     if (gameState.jogoPausado || gameState.jogoFinalizado) return;
-    
-    
-    gameState.ultimaDirecao.x = gameState.vel.x;
-    gameState.ultimaDirecao.y = gameState.vel.y;
-    
+
     const delta = agora - gameState.ultimoFrame;
     
     if (delta >= gameState.tempoVelocidade) {
