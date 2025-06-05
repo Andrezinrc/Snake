@@ -266,7 +266,11 @@ let cobraInimiga = {
     tail: 15,
     cor: "#ff0033",
     ativa: true,
-    morta: false
+    morta: false,
+    
+    modoCamuflagem: false,
+    tempoCamuflagem: 0,
+    usouCamuflagem: false,
 };
 
 
@@ -568,6 +572,14 @@ var meuGame = () => {
     //desenha cobrinha inimiga
     function desenhaCobraInimiga() {
         if (cobraInimiga.ativa) {
+            ctx.save();
+            
+            if (cobraInimiga.modoCamuflagem) {
+                ctx.globalAlpha = 0.15;
+            } else {
+                ctx.globalAlpha = 1;
+            }
+            
             for (let i = 0; i < cobraInimiga.rastro.length; i++) {
                 const x = cobraInimiga.rastro[i].x * gameState.tamanhoDaPeca;
                 const y = cobraInimiga.rastro[i].y * gameState.tamanhoDaPeca;
@@ -611,6 +623,9 @@ var meuGame = () => {
                     ctx.fillText(bit, x + 3, y + 8);
                 }
             }
+            
+            ctx.restore();//garante que o alpha volte ao normal
+            
         } else if (ultimaPosicao) {
             //desenha o X no local da última posição
             const x = ultimaPosicao.x * gameState.tamanhoDaPeca + 6;
@@ -777,15 +792,27 @@ var meuGame = () => {
         tempoUltimoMovInimiga = agora;
         
         decidirEstado();
+        
         if (!gameState.perdeu) {
             const alvo = escolherAlvo();
             moverCobraInimiga(alvo);
             verificarMorte();
         }
         
+        // Ativa o modo camuflagem quando a vida chega a 5 ou menos
+        if (cobraInimiga.tail <= 8 && (!cobraInimiga.fimCamuflagem || Date.now() >= cobraInimiga.proximaCamuflagem)) {
+            cobraInimiga.modoCamuflagem = true;
+            cobraInimiga.fimCamuflagem = Date.now() + 3000;
+            cobraInimiga.proximaCamuflagem = Date.now() + 10000; //10 segundos de recarga para evitar spam
+        }
+        
+        // verifica se o tempo de camuflagem acabou
+        if (cobraInimiga.modoCamuflagem && Date.now() >= cobraInimiga.fimCamuflagem) {
+            cobraInimiga.modoCamuflagem = false;
+        }
+        
         desenharTimerRespawn();
     }
-    
     
     // === SUBFUNÇÕES ===
     
