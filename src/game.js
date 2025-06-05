@@ -20,8 +20,8 @@ const gameState = {
     tamanhoDaPeca: 10,
     quantidadeDePeca: 35,
     velocidade: 1,
-    tempoVelocidade: 100,
-    tempoVelocidadeInimiga: 105,
+    tempoVelocidade: 105,
+    tempoVelocidadeInimiga: 108,
     pos: { x: 5, y: 5 },
     vel: { x: 1, y: 0 },
     ultimaDirecao: { x: 0, y: 0 },
@@ -56,6 +56,7 @@ const gameState = {
     { x: 0, y: 350 - 40, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
     { x: 350 - 60, y: 350 - 40, largura: 60, altura: 40, bits: 0, meta: 16, completo: false }
     ],
+    sistemaAtual: 0,
     
     feedbackJogador: { ativo: false, texto: "-1", x: 0, y: 0, cor: "#00ff88" },
 
@@ -333,29 +334,39 @@ var meuGame = () => {
     }
     
     
-    // Desenha visualmente o terminal/sistema no tabuleiro
+    // desenha visualmente o terminal/sistema no tabuleiro
     function desenharTerminais(ctx, tempo) {
         gameState.sistemas.forEach((sistema, i) => {
+            let cor = '#555'; // desativado
+            if (sistema.completo) cor = '#00ff00';
+            else if (i === gameState.sistemaAtual) cor = '#ff0033';
+            
             const gradiente = ctx.createLinearGradient(sistema.x, sistema.y, sistema.x + sistema.largura, sistema.y + sistema.altura);
             gradiente.addColorStop(0, '#1e1e1e');
             gradiente.addColorStop(1, '#2c2c2c');
             ctx.fillStyle = gradiente;
             ctx.fillRect(sistema.x, sistema.y, sistema.largura, sistema.altura);
             
-            const brilho = Math.sin(tempo / 300) * 2 + 2;
+            const brilho = (i === gameState.sistemaAtual) ? Math.sin(tempo / 300) * 2 + 2 : 1;
             ctx.lineWidth = brilho;
-            ctx.strokeStyle = sistema.completo ? '#00ff00' : '#ff0033';
+            ctx.strokeStyle = cor;
             ctx.strokeRect(sistema.x, sistema.y, sistema.largura, sistema.altura);
             
-            // Texto SYSTEM
-            ctx.fillStyle = sistema.completo ? '#00ff00' : '#ff0033';
+            //Texto SYSTEM
+            ctx.fillStyle = cor;
             ctx.font = 'bold 10px monospace';
-            ctx.fillText(sistema.completo ? 'SUCCESS' : 'ERROR', sistema.x + 5, sistema.y + 15);
+            ctx.fillText(
+                sistema.completo ? 'SUCCESS' :
+                i === gameState.sistemaAtual ? 'ERROR' : 'INACTIVE',
+                sistema.x + 5,
+                sistema.y + 15
+            );
             
-            // Bits (barra e texto)
+            //bits, barra e texto
             const progresso = sistema.bits / sistema.meta;
             ctx.fillStyle = '#888';
             ctx.fillRect(sistema.x + 5, sistema.y + 25, 50, 8);
+            
             ctx.fillStyle = sistema.completo ? '#00ff00' : '#00ff99';
             ctx.fillRect(sistema.x + 5, sistema.y + 25, 50 * progresso, 8);
             
@@ -1117,8 +1128,8 @@ var meuGame = () => {
         const cobraX = gameState.pos.x * gameState.tamanhoDaPeca;
         const cobraY = gameState.pos.y * gameState.tamanhoDaPeca;
         
-        gameState.sistemas.forEach((sistema) => {
-            if (sistema.completo) return;
+        gameState.sistemas.forEach((sistema, i) => {
+            if (sistema.completo || i !== gameState.sistemaAtual) return;
             
             const colisao = cobraX < sistema.x + sistema.largura &&
                 cobraX + gameState.tamanhoDaPeca > sistema.x &&
@@ -1148,8 +1159,9 @@ var meuGame = () => {
                 
                 if (sistema.bits >= sistema.meta) {
                     sistema.completo = true;
+                    gameState.sistemaAtual++;
                 }
-                
+            
                 const todosCompletos = gameState.sistemas.every(s => s.completo);
                 if (todosCompletos && !gameState.ganhou) {
                     gameState.vitoria();
