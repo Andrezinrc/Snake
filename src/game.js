@@ -169,8 +169,6 @@ const gameState = {
         if (this.perdeu) return;
         if (this.ganhou) return;
          
-        this.jogoFinalizado = true;
-         
         this.vel.x = 0;
         this.vel.y = 0;
         this.tail = 5;
@@ -185,14 +183,14 @@ const gameState = {
         
         clearInterval(this.contagem);
         console.log("✅ Vitória chamada");
+        
+        this.jogoFinalizado = true;
     },
     
     //game over
     gameOver() {
         if (this.ganhou) return;
         if (this.perdeu) return;
-        
-        this.jogoFinalizado = true;
         
         this.vel.x = 0;
         this.vel.y = 0;
@@ -207,6 +205,8 @@ const gameState = {
         
         clearInterval(this.contagem);
         console.log("❌ Game over chamado");
+        
+        this.jogoFinalizado = true;
     },
     
     //configuração dos botões
@@ -262,7 +262,7 @@ let cobraInimiga = {
     vel: { x: 0, y: 0 },
     velAnterior: { x: null, y: null },
     rastro: [],
-    tail: 5,
+    tail: 15,
     cor: "#ff0033",
     ativa: true,
     morta: false
@@ -278,9 +278,35 @@ var meuGame = () => {
     // evitando que o jogador faça movimentos reversos
     gameState.ultimaDirecao.x = gameState.vel.x;
     gameState.ultimaDirecao.y = gameState.vel.y;
+
     
     // === ANBIENTE DO JOGO ===
     
+    
+    function linhas(ctx, largura, altura) {
+        
+        ctx.fillStyle = '#0a0a14';
+        ctx.fillRect(0, 0, largura, altura);
+        
+        const step = 20;
+        
+        ctx.strokeStyle = 'rgba(0, 200, 255, 0.1)';
+        ctx.lineWidth = 1;
+        
+        for (let x = 0; x <= largura; x += step) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, altura);
+            ctx.stroke();
+        }
+        for (let y = 0; y <= altura; y += step) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(largura, y);
+            ctx.stroke();
+        }
+    }
+        
     //desenha tanbuleiro do jogo
     function desenhaTabuleiro() {
         ctx.clearRect(0, 0, gameState.canvas.width, gameState.canvas.height);
@@ -289,10 +315,7 @@ var meuGame = () => {
         gameState.canvas.width = 350;
         gameState.canvas.height = 350;
         
-        ctx.fillStyle = "#0f0f1a";
-        ctx.fillRect(0, 0, gameState.canvas.width, gameState.canvas.height);
-        gameState.canvas.style.opacity = 0.9;
-        
+        linhas(ctx, gameState.canvas.width, gameState.canvas.height);
         desenharGrade();
         desenharPixelsVivos();
         
@@ -543,6 +566,33 @@ var meuGame = () => {
                 ctx.fillStyle = isCabeca ? "#ff0033" : "#2a0000";
                 ctx.fillRect(x, y, gameState.tamanhoDaPeca - 1, gameState.tamanhoDaPeca - 1);
                 
+                //desenha barrinha de vida
+                if (isCabeca) {
+                    const vidaMaxima = 15;
+                    const larguraMax = gameState.tamanhoDaPeca + 5;
+                    const alturaBarra = 3;
+                    
+                    const vidaAtual = cobraInimiga.tail;
+                    const larguraAtual = (vidaAtual / vidaMaxima) * larguraMax;
+                    
+                    // Cor da barra de vida
+                    let corVida = "#00ff66"; //verde
+                    if (vidaAtual <= 10) corVida = "#ffcc00"; //amarelo
+                    if (vidaAtual <= 5) corVida = "#ff3300"; //vermelho
+                    
+                    // Desenhar fundo da barra
+                    ctx.fillStyle = "#7a7a7a";
+                    ctx.fillRect(x, y - 6, larguraMax, alturaBarra);
+                    
+                    // Desenhar vida atual
+                    ctx.fillStyle = corVida;
+                    ctx.fillRect(x, y - 6, larguraAtual, alturaBarra);
+                    
+                    // Bordas
+                    ctx.strokeStyle = "#000";
+                    ctx.strokeRect(x, y - 6, larguraMax, alturaBarra);
+                }
+                
                 if (!isCabeca) {
                     ctx.fillStyle = "red";
                     ctx.font = "bold 10px monospace";
@@ -551,7 +601,7 @@ var meuGame = () => {
                 }
             }
         } else if (ultimaPosicao) {
-            // Cobra morta: desenha o X no local da última posição
+            //desenha o X no local da última posição
             const x = ultimaPosicao.x * gameState.tamanhoDaPeca + 6;
             const y = ultimaPosicao.y * gameState.tamanhoDaPeca + 14;
             ctx.fillStyle = "red";
