@@ -36,6 +36,7 @@ const gameState = {
     dificuldadeAtual: 0,
     cobraVerde: true,
     tempo: 300,
+    tempoAtual: 0,
     poderTempo: 0,
     jogoPausado: false,
     ultimoFrame: 0,
@@ -51,11 +52,12 @@ const gameState = {
     
     //sistemas que precisam de bits no jogo
     sistemas: [
-    { x: 0, y: 0, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
-    { x: 350 - 60, y: 0, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
-    { x: 0, y: 350 - 40, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
-    { x: 350 - 60, y: 350 - 40, largura: 60, altura: 40, bits: 0, meta: 16, completo: false }
+        { x: 0, y: 0, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
+        { x: 350 - 60, y: 0, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
+        { x: 0, y: 350 - 40, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
+        { x: 350 - 60, y: 350 - 40, largura: 60, altura: 40, bits: 0, meta: 16, completo: false }
     ],
+    
     sistemaAtual: 0,
     
     feedbackJogador: { ativo: false, texto: "-1", x: 0, y: 0, cor: "#00ff88" },
@@ -176,7 +178,7 @@ const gameState = {
         this.ganhou = true;
         this.mensagem_final.style.display = "block";
         this.mensagem_final.style.color = "green";
-        document.getElementById("mensagem-final").innerText = "Você ganhou!";
+        document.getElementById("mensagem-final").innerText = "SISTEMAS RESTAURADO!";
         this.pausar.style.display = "none";
         this.botoes.style.display = "none";
         this.jogarNovamente.style.display = "block";
@@ -198,7 +200,7 @@ const gameState = {
         this.tail = 5;
         this.perdeu = true;
         this.mensagem_final.style.display = "block";
-        document.getElementById("mensagem-final").innerText = "Você perdeu!";
+        document.getElementById("mensagem-final").innerText = "ERRO FATAL!";
         this.pausar.style.display = "none";
         this.botoes.style.display = "none";
         this.jogarNovamente.style.display = "block";
@@ -279,6 +281,8 @@ var meuGame = () => {
     if (gameState.jogoPausado) return;
     console.log("Game rodando", gameState.vel.x, gameState.vel.y);
     
+    gameState.tempoAtual = performance.now();
+    
     //garante que a última direção registrada seja igual à velocidade atual,
     // evitando que o jogador faça movimentos reversos
     gameState.ultimaDirecao.x = gameState.vel.x;
@@ -339,11 +343,14 @@ var meuGame = () => {
     
     
     // desenha visualmente o terminal/sistema no tabuleiro
-    function desenharTerminais(ctx, tempo) {
+    function desenharTerminais(ctx) {
         gameState.sistemas.forEach((sistema, i) => {
             let cor = '#555'; // desativado
             if (sistema.completo) cor = '#00ff00';
-            else if (i === gameState.sistemaAtual) cor = '#ff0033';
+            else if (i === gameState.sistemaAtual) {
+                const pisca = Math.floor(gameState.tempoAtual / 300) % 2 === 0;
+                cor = pisca ? '#ff0033' : '#7a0000';
+            }
             
             const gradiente = ctx.createLinearGradient(sistema.x, sistema.y, sistema.x + sistema.largura, sistema.y + sistema.altura);
             gradiente.addColorStop(0, '#1e1e1e');
@@ -351,7 +358,7 @@ var meuGame = () => {
             ctx.fillStyle = gradiente;
             ctx.fillRect(sistema.x, sistema.y, sistema.largura, sistema.altura);
             
-            const brilho = (i === gameState.sistemaAtual) ? Math.sin(tempo / 300) * 2 + 2 : 1;
+            const brilho = (i === gameState.sistemaAtual) ? Math.sin(gameState.tempoAtual / 300) * 2 + 2 : 1;
             ctx.lineWidth = brilho;
             ctx.strokeStyle = cor;
             ctx.strokeRect(sistema.x, sistema.y, sistema.largura, sistema.altura);
@@ -379,8 +386,7 @@ var meuGame = () => {
             ctx.fillText(`${sistema.bits}b/${sistema.meta}b`, sistema.x + 10, sistema.y + 38);
         });
     }
-    
-    
+        
     // desenha grade do tabuleiro
     function desenharGrade() {
         ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
@@ -400,6 +406,7 @@ var meuGame = () => {
             ctx.stroke();
         }
     }
+    
     
     //desenha efeitos de chuvisco
     function desenharPixelsVivos() {
