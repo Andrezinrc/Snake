@@ -1,6 +1,6 @@
 {
-  "name": "Meu Joguinho",
-  "short_name": "Snake Game",
+  "name": "BitSnake",
+  "short_name": "BitSnake",
   "start_url": "./home.html",
   "display": "standalone",
   "background_color": "#121212",

@@ -48,12 +48,13 @@
         background-color: #1e1e2f;
         color: #9B59FF;
         border: 1px solid rgba(0, 184, 148, 0.5);
+        box-shadow: 0 0 8px rgba(155, 89, 255, 0.4);
         border-radius: 8px;
-        font-family: 'monospace';
         font-weight: bold;
         text-transform: uppercase;
         letter-spacing: 1px;
-        font-size: 14px;
+        font-size: 1rem;
+        font-family: 'Courier New', monospace;
         padding: 10px 20px;
         display: flex;
         justify-content: center;
@@ -68,8 +69,9 @@
     }
 
     #cima:hover, #baixo:hover, #esquerda:hover, #direita:hover {
-        background-color: #2c2c3e;
-        color: #ffffff;
+        background-color: #292944;
+        box-shadow: 0 0 12px rgba(155, 89, 255, 0.7);
+        transform: scale(1.03);
     }
 
     #cima {

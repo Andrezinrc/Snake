@@ -1,4 +1,4 @@
-import { controlePc, controleMobile } from "./controles.js";
+mport { controlePc, controleMobile } from "./controles.js";
 
 const gameState = {
     canvas: document.querySelector("#gameCanvas"),
@@ -52,12 +52,11 @@ const gameState = {
     
     //sistemas que precisam de bits no jogo
     sistemas: [
-        { x: 0, y: 0, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
-        { x: 350 - 60, y: 0, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
-        { x: 0, y: 350 - 40, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
-        { x: 350 - 60, y: 350 - 40, largura: 60, altura: 40, bits: 0, meta: 16, completo: false }
+    { x: 0, y: 0, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
+    { x: 350 - 60, y: 0, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
+    { x: 0, y: 350 - 40, largura: 60, altura: 40, bits: 0, meta: 16, completo: false },
+    { x: 350 - 60, y: 350 - 40, largura: 60, altura: 40, bits: 0, meta: 16, completo: false }
     ],
-    
     sistemaAtual: 0,
     
     feedbackJogador: { ativo: false, texto: "-1", x: 0, y: 0, cor: "#00ff88" },
@@ -178,7 +177,7 @@ const gameState = {
         this.ganhou = true;
         this.mensagem_final.style.display = "block";
         this.mensagem_final.style.color = "green";
-        document.getElementById("mensagem-final").innerText = "SISTEMAS RESTAURADO!";
+        document.getElementById("mensagem-final").innerText = "DADOS ENTREGUES!";
         this.pausar.style.display = "none";
         this.botoes.style.display = "none";
         this.jogarNovamente.style.display = "block";
@@ -222,8 +221,10 @@ const gameState = {
             this.continuarJogo();
         });
         
+        this.jogarNovamente.innerText = this.ganhou ? "Reiniciar missão" : "Tentar novamente";
+        
         this.jogarNovamente.addEventListener("click", () => {
-            Carregar();
+             Carregar();
         });
         
         this.voltar.addEventListener("click", () => {
@@ -245,8 +246,9 @@ const gameState = {
     }
 };
 
-//Inicializa o contexto do canvas
-const ctx = gameState.canvas.getContext("2d");
+
+//evitar verbosidade e acessar o gameState
+const gs = gameState;
 
 
 let alvo;
@@ -261,7 +263,7 @@ let feedbackInimiga = { ativo: false, texto: "+1", x: 0, y: 0, cor: "red" };
 
 //estado da cobra inimiga
 let cobraInimiga = {
-    pos: { x: Math.floor(Math.random() * gameState.quantidadeDePeca), y: Math.floor(Math.random() * gameState.quantidadeDePeca) },
+    pos: { x: Math.floor(Math.random() * gs.quantidadeDePeca), y: Math.floor(Math.random() * gs.quantidadeDePeca) },
     vel: { x: 0, y: 0 },
     velAnterior: { x: null, y: null },
     rastro: [],
@@ -275,18 +277,23 @@ let cobraInimiga = {
     usouCamuflagem: false,
 };
 
+const ci = cobraInimiga;
+
+//Inicializa o contexto do canvas
+const ctx = gs.canvas.getContext("2d");
+
 
 //funcao do jogo
 var meuGame = () => {
-    if (gameState.jogoPausado) return;
-    console.log("Game rodando", gameState.vel.x, gameState.vel.y);
+    if (gs.jogoPausado) return;
+    console.log("Game rodando", gs.vel.x, gs.vel.y);
     
-    gameState.tempoAtual = performance.now();
+    gs.tempoAtual = performance.now();
     
     //garante que a última direção registrada seja igual à velocidade atual,
     // evitando que o jogador faça movimentos reversos
-    gameState.ultimaDirecao.x = gameState.vel.x;
-    gameState.ultimaDirecao.y = gameState.vel.y;
+    gs.ultimaDirecao.x = gs.vel.x;
+    gs.ultimaDirecao.y = gs.vel.y;
 
     
     // === ANBIENTE DO JOGO ===
@@ -318,37 +325,37 @@ var meuGame = () => {
         
     //desenha tanbuleiro do jogo
     function desenhaTabuleiro() {
-        ctx.clearRect(0, 0, gameState.canvas.width, gameState.canvas.height);
-        gameState.mensagem_final.style.display = "none";
+        ctx.clearRect(0, 0, gs.canvas.width, gs.canvas.height);
+        gs.mensagem_final.style.display = "none";
         
-        gameState.canvas.width = 350;
-        gameState.canvas.height = 350;
+        gs.canvas.width = 350;
+        gs.canvas.height = 350;
         
-        linhas(ctx, gameState.canvas.width, gameState.canvas.height);
+        linhas(ctx, gs.canvas.width, gs.canvas.height);
         desenharGrade();
         desenharPixelsVivos();
         
         // movimentação e teletransporte
-        gameState.pos.x += gameState.vel.x;
-        gameState.pos.y += gameState.vel.y;
+        gs.pos.x += gs.vel.x;
+        gs.pos.y += gs.vel.y;
         
-        if (gameState.pos.x < 0) gameState.pos.x = gameState.quantidadeDePeca - 1;
-        if (gameState.pos.x > gameState.quantidadeDePeca - 1) gameState.pos.x = 0;
-        if (gameState.pos.y < 0) gameState.pos.y = gameState.quantidadeDePeca - 1;
-        if (gameState.pos.y > gameState.quantidadeDePeca - 1) gameState.pos.y = 0;
+        if (gs.pos.x < 0) gs.pos.x = gs.quantidadeDePeca - 1;
+        if (gs.pos.x > gs.quantidadeDePeca - 1) gs.pos.x = 0;
+        if (gs.pos.y < 0) gs.pos.y = gs.quantidadeDePeca - 1;
+        if (gs.pos.y > gs.quantidadeDePeca - 1) gs.pos.y = 0;
         
-        cobraInimiga.pos.x = Math.max(0, Math.min(gameState.quantidadeDePeca - 1, cobraInimiga.pos.x));
-        cobraInimiga.pos.y = Math.max(0, Math.min(gameState.quantidadeDePeca - 1, cobraInimiga.pos.y));
+        ci.pos.x = Math.max(0, Math.min(gs.quantidadeDePeca - 1, ci.pos.x));
+        ci.pos.y = Math.max(0, Math.min(gs.quantidadeDePeca - 1, ci.pos.y));
     }
     
     
     // desenha visualmente o terminal/sistema no tabuleiro
     function desenharTerminais(ctx) {
-        gameState.sistemas.forEach((sistema, i) => {
+        gs.sistemas.forEach((sistema, i) => {
             let cor = '#555'; // desativado
             if (sistema.completo) cor = '#00ff00';
-            else if (i === gameState.sistemaAtual) {
-                const pisca = Math.floor(gameState.tempoAtual / 300) % 2 === 0;
+            else if (i === gs.sistemaAtual) {
+                const pisca = Math.floor(gs.tempoAtual / 300) % 2 === 0;
                 cor = pisca ? '#ff0033' : '#7a0000';
             }
             
@@ -358,7 +365,7 @@ var meuGame = () => {
             ctx.fillStyle = gradiente;
             ctx.fillRect(sistema.x, sistema.y, sistema.largura, sistema.altura);
             
-            const brilho = (i === gameState.sistemaAtual) ? Math.sin(gameState.tempoAtual / 300) * 2 + 2 : 1;
+            const brilho = (i === gs.sistemaAtual) ? Math.sin(gs.tempoAtual / 300) * 2 + 2 : 1;
             ctx.lineWidth = brilho;
             ctx.strokeStyle = cor;
             ctx.strokeRect(sistema.x, sistema.y, sistema.largura, sistema.altura);
@@ -368,7 +375,7 @@ var meuGame = () => {
             ctx.font = 'bold 10px monospace';
             ctx.fillText(
                 sistema.completo ? 'SUCCESS' :
-                i === gameState.sistemaAtual ? 'ERROR' : 'INACTIVE',
+                i === gs.sistemaAtual ? 'ERROR' : 'INACTIVE',
                 sistema.x + 5,
                 sistema.y + 15
             );
@@ -392,17 +399,17 @@ var meuGame = () => {
         ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
         ctx.lineWidth = 1;
         
-        for (let x = 0; x < gameState.canvas.width; x += gameState.tamanhoDaPeca) {
+        for (let x = 0; x < gs.canvas.width; x += gs.tamanhoDaPeca) {
             ctx.beginPath();
             ctx.moveTo(x, 0);
-            ctx.lineTo(x, gameState.canvas.height);
+            ctx.lineTo(x, gs.canvas.height);
             ctx.stroke();
         }
         
-        for (let y = 0; y < gameState.canvas.height; y += gameState.tamanhoDaPeca) {
+        for (let y = 0; y < gs.canvas.height; y += gs.tamanhoDaPeca) {
             ctx.beginPath();
             ctx.moveTo(0, y);
-            ctx.lineTo(gameState.canvas.width, y);
+            ctx.lineTo(gs.canvas.width, y);
             ctx.stroke();
         }
     }
@@ -411,8 +418,8 @@ var meuGame = () => {
     //desenha efeitos de chuvisco
     function desenharPixelsVivos() {
         for (let i = 0; i < 25; i++) {
-            const x = Math.floor(Math.random() * gameState.canvas.width);
-            const y = Math.floor(Math.random() * gameState.canvas.height);
+            const x = Math.floor(Math.random() * gs.canvas.width);
+            const y = Math.floor(Math.random() * gs.canvas.height);
             const brilho = Math.random() * 0.4 + 0.1;
             ctx.fillStyle = `rgba(155, 89, 255, ${brilho})`;
             ctx.fillRect(x, y, 1, 1);
@@ -425,11 +432,11 @@ var meuGame = () => {
     
     // Desenha os olhos
     function desenhaOlhos() {
-        if (gameState.rastro.length > 0) {
-            const cabeca = gameState.rastro[gameState.rastro.length - 1];
+        if (gs.rastro.length > 0) {
+            const cabeca = gs.rastro[gs.rastro.length - 1];
             // Aura ao redor da cabeça
-            if (gameState.temPoder) {
-                const corAura = gameState.cobraVerde ? "#6C5CE7" : "#00D26A";
+            if (gs.temPoder) {
+                const corAura = gs.cobraVerde ? "#6C5CE7" : "#00D26A";
                 desenharAuraDaCabeca(cabeca, corAura);
             }
             
@@ -438,17 +445,18 @@ var meuGame = () => {
             // Desenha os olhos
             ctx.fillStyle = 'black';
             ctx.fillRect(
-                (cabeca.x + 0.25) * gameState.tamanhoDaPeca,
-                (cabeca.y + 0.25) * gameState.tamanhoDaPeca,
-                gameState.tamanhoDaPeca / 4,
-                gameState.tamanhoDaPeca / 4
+                (cabeca.x + 0.25) * gs.tamanhoDaPeca,
+                (cabeca.y + 0.25) * gs.tamanhoDaPeca,
+                
+                gs.tamanhoDaPeca / 4,
+                gs.tamanhoDaPeca / 4
             ); // Olho esquerdo
             
             ctx.fillRect(
-                (cabeca.x + 0.75) * gameState.tamanhoDaPeca,
-                (cabeca.y + 0.25) * gameState.tamanhoDaPeca,
-                gameState.tamanhoDaPeca / 4,
-                gameState.tamanhoDaPeca / 4
+                (cabeca.x + 0.75) * gs.tamanhoDaPeca,
+                (cabeca.y + 0.25) * gs.tamanhoDaPeca,
+                gs.tamanhoDaPeca / 4,
+                gs.tamanhoDaPeca / 4
             ); // Olho direito
             
             ctx.fillStyle = corOriginal;
@@ -458,38 +466,38 @@ var meuGame = () => {
     
     //desenha lingua
     function desenhaLingua() {
-        if (gameState.rastro.length > 0 && gameState.tongueVisible) {
-            const cabeca = gameState.rastro[gameState.rastro.length - 1];
+        if (gs.rastro.length > 0 && gs.tongueVisible) {
+            const cabeca = gs.rastro[gs.rastro.length - 1];
             
             ctx.fillStyle = 'red';
             ctx.fillRect(
-                (cabeca.x + 0.5) * gameState.tamanhoDaPeca,
-                (cabeca.y + 0.9) * gameState.tamanhoDaPeca,
-                gameState.tamanhoDaPeca / 2,
-                gameState.tamanhoDaPeca / 4
+                (cabeca.x + 0.5) * gs.tamanhoDaPeca,
+                (cabeca.y + 0.9) * gs.tamanhoDaPeca,
+                gs.tamanhoDaPeca / 2,
+                gs.tamanhoDaPeca / 4
             );
         }
         //Anima a língua
         setInterval(() => {
-            gameState.tongueVisible = !gameState.tongueVisible;
+            gs.tongueVisible = !gs.tongueVisible;
         }, 500);
     }
     
     
     // desenha a cobrinha
     function desenhaCobra() {
-        for (var i = 0; i < gameState.rastro.length; i++) {
-            const x = gameState.rastro[i].x * gameState.tamanhoDaPeca;
-            const y = gameState.rastro[i].y * gameState.tamanhoDaPeca;
-            const isCabeca = i === gameState.rastro.length - 1;
+        for (var i = 0; i < gs.rastro.length; i++) {
+            const x = gs.rastro[i].x * gs.tamanhoDaPeca;
+            const y = gs.rastro[i].y * gs.tamanhoDaPeca;
+            const isCabeca = i === gs.rastro.length - 1;
             
-            if (gameState.temPoder) {
+            if (gs.temPoder) {
                 if (isCabeca) {
                     ctx.fillStyle = "#9B59FF";
-                    ctx.fillRect(x, y, gameState.tamanhoDaPeca - 1, gameState.tamanhoDaPeca - 1);
+                    ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
                 } else {
                     ctx.fillStyle = "rgba(108, 92, 231, 0.5)";
-                    ctx.fillRect(x, y, gameState.tamanhoDaPeca - 1, gameState.tamanhoDaPeca - 1);
+                    ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
                 }
                 
                 // Bits roxos
@@ -508,13 +516,13 @@ var meuGame = () => {
             } else {
                 if (isCabeca) {
                     ctx.fillStyle = "#00ffaa";
-                    ctx.fillRect(x, y, gameState.tamanhoDaPeca - 1, gameState.tamanhoDaPeca - 1);
+                    ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
                 } else {
                     ctx.fillStyle = "#002a1e";
-                    ctx.fillRect(x, y, gameState.tamanhoDaPeca - 1, gameState.tamanhoDaPeca - 1);
+                    ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
                     
                     ctx.strokeStyle = "#003322";
-                    ctx.strokeRect(x, y, gameState.tamanhoDaPeca - 1, gameState.tamanhoDaPeca - 1);
+                    ctx.strokeRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
                     
                     // bits verdes
                     ctx.fillStyle = "rgba(0,255,140,0.5)";
@@ -525,26 +533,26 @@ var meuGame = () => {
             }
             
             // Colisão com o próprio corpo
-            if (!gameState.temPoder && gameState.rastro[i].x === gameState.pos.x && gameState.rastro[i].y === gameState.pos.y) {
-                gameState.gameOver();
-                gameState.perdeu = true;
+            if (!gs.temPoder && gs.rastro[i].x === gs.pos.x && gs.rastro[i].y === gs.pos.y) {
+                gs.gameOver();
+                gs.perdeu = true;
                 
                 //para a cobrinha inimiga
-                cobraInimiga.vel.x = 0;
-                cobraInimiga.vel.t = 0;
+                ci.vel.x = 0;
+                ci.vel.t = 0;
             }
         }
     }
     
     //desenha rastro
     function desenhaRastro() {
-        gameState.rastro.push({
-            x: gameState.pos.x,
-            y: gameState.pos.y
+        gs.rastro.push({
+            x: gs.pos.x,
+            y: gs.pos.y
         });
         
-        while (gameState.rastro.length > gameState.tail) {
-            gameState.rastro.shift();
+        while (gs.rastro.length > gs.tail) {
+            gs.rastro.shift();
         }
     }
     
@@ -554,55 +562,55 @@ var meuGame = () => {
     
     //desenha olhos da cobrinha inimga
     function desenhaOlhosInimiga() {
-        if (!cobraInimiga.ativa) return;
+        if (!ci.ativa) return;
         
-        const cabeca = cobraInimiga.rastro[cobraInimiga.rastro.length - 1];
+        const cabeca = ci.rastro[ci.rastro.length - 1];
         if (!cabeca) return;
         
         ctx.fillStyle = 'black';
         ctx.fillRect(
-            (cabeca.x + 0.25) * gameState.tamanhoDaPeca,
-            (cabeca.y + 0.25) * gameState.tamanhoDaPeca,
-            gameState.tamanhoDaPeca / 4,
-            gameState.tamanhoDaPeca / 4
+            (cabeca.x + 0.25) * gs.tamanhoDaPeca,
+            (cabeca.y + 0.25) * gs.tamanhoDaPeca,
+            gs.tamanhoDaPeca / 4,
+            gs.tamanhoDaPeca / 4
         );
         
         ctx.fillRect(
-            (cabeca.x + 0.75) * gameState.tamanhoDaPeca,
-            (cabeca.y + 0.25) * gameState.tamanhoDaPeca,
-            gameState.tamanhoDaPeca / 4,
-            gameState.tamanhoDaPeca / 4
+            (cabeca.x + 0.75) * gs.tamanhoDaPeca,
+            (cabeca.y + 0.25) * gs.tamanhoDaPeca,
+            gs.tamanhoDaPeca / 4,
+            gs.tamanhoDaPeca / 4
         );
     }
     
     
     //desenha cobrinha inimiga
     function desenhaCobraInimiga() {
-        if (cobraInimiga.ativa) {
+        if (ci.ativa) {
             ctx.save();
             
-            if (cobraInimiga.modoCamuflagem) {
+            if (ci.modoCamuflagem) {
                 ctx.globalAlpha = 0.15;
             } else {
                 ctx.globalAlpha = 1;
             }
             
-            for (let i = 0; i < cobraInimiga.rastro.length; i++) {
-                const x = cobraInimiga.rastro[i].x * gameState.tamanhoDaPeca;
-                const y = cobraInimiga.rastro[i].y * gameState.tamanhoDaPeca;
+            for (let i = 0; i < ci.rastro.length; i++) {
+                const x = ci.rastro[i].x * gs.tamanhoDaPeca;
+                const y = ci.rastro[i].y * gs.tamanhoDaPeca;
                 
-                const isCabeca = i === cobraInimiga.rastro.length - 1;
+                const isCabeca = i === ci.rastro.length - 1;
                 
                 ctx.fillStyle = isCabeca ? "#ff0033" : "#2a0000";
-                ctx.fillRect(x, y, gameState.tamanhoDaPeca - 1, gameState.tamanhoDaPeca - 1);
+                ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
                 
                 //desenha barrinha de vida
                 if (isCabeca) {
                     const vidaMaxima = 15;
-                    const larguraMax = gameState.tamanhoDaPeca + 5;
+                    const larguraMax = gs.tamanhoDaPeca + 5;
                     const alturaBarra = 3;
                     
-                    const vidaAtual = cobraInimiga.tail;
+                    const vidaAtual = ci.tail;
                     const larguraAtual = (vidaAtual / vidaMaxima) * larguraMax;
                     
                     // Cor da barra de vida
@@ -635,8 +643,8 @@ var meuGame = () => {
             
         } else if (ultimaPosicao) {
             //desenha o X no local da última posição
-            const x = ultimaPosicao.x * gameState.tamanhoDaPeca + 6;
-            const y = ultimaPosicao.y * gameState.tamanhoDaPeca + 14;
+            const x = ultimaPosicao.x * gs.tamanhoDaPeca + 6;
+            const y = ultimaPosicao.y * gs.tamanhoDaPeca + 14;
             ctx.fillStyle = "red";
             ctx.font = "bold 14px monospace";
             ctx.fillText("X", x, y);
@@ -646,18 +654,18 @@ var meuGame = () => {
     
     //desenha rastro cobra inimiga
     function atualizaRastroInimiga() {
-        if (!cobraInimiga.ativa) return;
+        if (!ci.ativa) return;
         
-        const ultimaPos = cobraInimiga.rastro.at(-1);
-        const atual = { x: cobraInimiga.pos.x, y: cobraInimiga.pos.y };
+        const ultimaPos = ci.rastro.at(-1);
+        const atual = { x: ci.pos.x, y: ci.pos.y };
         
         // Adiciona somente se mudou
         if (!ultimaPos || ultimaPos.x !== atual.x || ultimaPos.y !== atual.y) {
-            cobraInimiga.rastro.push(atual);
+            ci.rastro.push(atual);
         }
         
-        while (cobraInimiga.rastro.length > cobraInimiga.tail) {
-            cobraInimiga.rastro.shift();
+        while (ci.rastro.length > ci.tail) {
+            ci.rastro.shift();
         }
     }
     
@@ -667,8 +675,8 @@ var meuGame = () => {
     
     //desenha a maça
     function desenhaMaca() {
-        const x = gameState.maca.x * gameState.tamanhoDaPeca;
-        const y = gameState.maca.y * gameState.tamanhoDaPeca;
+        const x = gs.maca.x * gs.tamanhoDaPeca;
+        const y = gs.maca.y * gs.tamanhoDaPeca;
         
         ctx.fillStyle = "#00ff88";
         ctx.font = "bold 14px monospace";
@@ -693,7 +701,7 @@ var meuGame = () => {
     //particulas de efeito de colisao
     function explodirParticulas(x, y, cor) {
         for (let i = 0; i < 10; i++) {
-            gameState.particulas.push({
+            gs.particulas.push({
                 x: x,
                 y: y,
                 dx: (Math.random() - 0.5) * 6,
@@ -709,8 +717,8 @@ var meuGame = () => {
     
     //desenha particulas da maça
     function desenharParticulas() {
-        for (let i = gameState.particulas.length - 1; i >= 0; i--) {
-            const p = gameState.particulas[i];
+        for (let i = gs.particulas.length - 1; i >= 0; i--) {
+            const p = gs.particulas[i];
             ctx.shadowColor = p.cor;
             ctx.shadowBlur = 10;
             ctx.beginPath();
@@ -722,7 +730,7 @@ var meuGame = () => {
             p.life--;
             
             if (p.life <= 0 || p.alpha <= 0) {
-                gameState.particulas.splice(i, 1);
+                gs.particulas.splice(i, 1);
             }
         }
         ctx.globalAlpha = 1.0;
@@ -734,9 +742,9 @@ var meuGame = () => {
     
     //cria efeito animacao poder
     function desenharAuraDaCabeca(cabeca, cor) {
-        const centerX = (cabeca.x + 0.5) * gameState.tamanhoDaPeca;
-        const centerY = (cabeca.y + 0.5) * gameState.tamanhoDaPeca;
-        const raio = gameState.tamanhoDaPeca * 2.2;
+        const centerX = (cabeca.x + 0.5) * gs.tamanhoDaPeca;
+        const centerY = (cabeca.y + 0.5) * gs.tamanhoDaPeca;
+        const raio = gs.tamanhoDaPeca * 2.2;
         
         ctx.save();
         ctx.beginPath();
@@ -754,11 +762,11 @@ var meuGame = () => {
     
     // Função que desenha o poder se estiver visível
     function desenharPoder() {
-        if (!gameState.poderVisivel) return;
+        if (!gs.poderVisivel) return;
         
-        const centerX = (gameState.poder.x + 0.5) * gameState.tamanhoDaPeca;
-        const centerY = (gameState.poder.y + 0.5) * gameState.tamanhoDaPeca;
-        const raio = gameState.tamanhoDaPeca * 2.2;
+        const centerX = (gs.poder.x + 0.5) * gs.tamanhoDaPeca;
+        const centerY = (gs.poder.y + 0.5) * gs.tamanhoDaPeca;
+        const raio = gs.tamanhoDaPeca * 2.2;
         
         // Desenha a aura roxa
         ctx.save();
@@ -774,8 +782,8 @@ var meuGame = () => {
         
         //desenha o bit com brilho
         ctx.save();
-        const x = gameState.poder.x * gameState.tamanhoDaPeca;
-        const y = gameState.poder.y * gameState.tamanhoDaPeca;
+        const x = gs.poder.x * gs.tamanhoDaPeca;
+        const y = gs.poder.y * gs.tamanhoDaPeca;
         
         ctx.shadowColor = "#6C5CE7";
         ctx.shadowBlur = 20;
@@ -792,30 +800,30 @@ var meuGame = () => {
     
     //controla o comportamento da cobrinha inimiga: decide o alvo, move, verifica morte e desenha o timer de respawn
     function atualizarCobraInimiga() {
-        if (!cobraInimiga.ativa) return;
+        if (!ci.ativa) return;
         
         const agora = Date.now();
-        if (agora - tempoUltimoMovInimiga < gameState.tempoVelocidadeInimiga) return;
+        if (agora - tempoUltimoMovInimiga < gs.tempoVelocidadeInimiga) return;
         tempoUltimoMovInimiga = agora;
         
         decidirEstado();
         
-        if (!gameState.perdeu) {
+        if (!gs.perdeu) {
             const alvo = escolherAlvo();
             moverCobraInimiga(alvo);
             verificarMorte();
         }
         
         // Ativa o modo camuflagem quando a vida chega a 5 ou menos
-        if (cobraInimiga.tail <= 8 && (!cobraInimiga.fimCamuflagem || Date.now() >= cobraInimiga.proximaCamuflagem)) {
-            cobraInimiga.modoCamuflagem = true;
-            cobraInimiga.fimCamuflagem = Date.now() + 3000;
-            cobraInimiga.proximaCamuflagem = Date.now() + 10000; //10 segundos de recarga para evitar spam
+        if (ci.tail <= 8 && (!ci.fimCamuflagem || Date.now() >= ci.proximaCamuflagem)) {
+            ci.modoCamuflagem = true;
+            ci.fimCamuflagem = Date.now() + 3000;
+            ci.proximaCamuflagem = Date.now() + 10000; //10 segundos de recarga para evitar spam
         }
         
         // verifica se o tempo de camuflagem acabou
-        if (cobraInimiga.modoCamuflagem && Date.now() >= cobraInimiga.fimCamuflagem) {
-            cobraInimiga.modoCamuflagem = false;
+        if (ci.modoCamuflagem && Date.now() >= ci.fimCamuflagem) {
+            ci.modoCamuflagem = false;
         }
         
         desenharTimerRespawn();
@@ -825,29 +833,29 @@ var meuGame = () => {
     
     
     function decidirEstado() {
-        if (gameState.temPoder) {
-            cobraInimiga.estado = "fugindo";
+        if (gs.temPoder) {
+            ci.estado = "fugindo";
         } else {
-            cobraInimiga.estado = cobraInimiga.tail < 5 ? "fugindo" : "atacando";
+            ci.estado = ci.tail < 5 ? "fugindo" : "atacando";
         }
     }
     
     
     //cobra inimiga escolhe o alvo mais proximo
     function escolherAlvo() {
-        if (cobraInimiga.estado === "fugindo") return gameState.maca;
+        if (ci.estado === "fugindo") return gs.maca;
         
         //ataca a cauda do jogador se for longa
-        const caudaJogador = gameState.rastro.slice(0, -1);
-        const temCaudaAlvo = gameState.tail > 3 && caudaJogador.length > 0;
+        const caudaJogador = gs.rastro.slice(0, -1);
+        const temCaudaAlvo = gs.tail > 3 && caudaJogador.length > 0;
         
-        let alvo = gameState.maca;
-        let distAlvo = Math.abs(cobraInimiga.pos.x - gameState.maca.x) + Math.abs(cobraInimiga.pos.y - gameState.maca.y);
+        let alvo = gs.maca;
+        let distAlvo = Math.abs(ci.pos.x - gs.maca.x) + Math.abs(ci.pos.y - gs.maca.y);
         
         if (temCaudaAlvo) {
             for (let i = 0; i < caudaJogador.length; i++) {
                 const p = caudaJogador[i];
-                const d = Math.abs(cobraInimiga.pos.x - p.x) + Math.abs(cobraInimiga.pos.y - p.y);
+                const d = Math.abs(ci.pos.x - p.x) + Math.abs(ci.pos.y - p.y);
                 if (d < distAlvo) {
                     distAlvo = d;
                     alvo = p;
@@ -861,33 +869,33 @@ var meuGame = () => {
     
     // Move a cobra inimiga em direção ao alvo (prioriza o eixo com maior distância)
     function moverCobraInimiga(alvo) {
-        const dx = alvo.x - cobraInimiga.pos.x;
-        const dy = alvo.y - cobraInimiga.pos.y;
+        const dx = alvo.x - ci.pos.x;
+        const dy = alvo.y - ci.pos.y;
         
         if (Math.abs(dx) > Math.abs(dy)) {
-            cobraInimiga.vel.x = dx > 0 ? 1 : -1;
-            cobraInimiga.vel.y = 0;
+            ci.vel.x = dx > 0 ? 1 : -1;
+            ci.vel.y = 0;
         } else {
-            cobraInimiga.vel.x = 0;
-            cobraInimiga.vel.y = dy > 0 ? 1 : -1;
+            ci.vel.x = 0;
+            ci.vel.y = dy > 0 ? 1 : -1;
         }
         
-        cobraInimiga.pos.x += cobraInimiga.vel.x;
-        cobraInimiga.pos.y += cobraInimiga.vel.y;
+        ci.pos.x += ci.vel.x;
+        ci.pos.y += ci.vel.y;
     }
     
     
     // Verifica se a cobrinha inimiga morreu e inicia o tempo de respawn caso necessário
     function verificarMorte() {
-        if (cobraInimiga.tail <= 3) {
-            cobraInimiga.ativa = false;
-            cobraInimiga.morta = true;
+        if (ci.tail <= 3) {
+            ci.ativa = false;
+            ci.morta = true;
             
-            ultimaPosicao = { x: cobraInimiga.pos.x, y: cobraInimiga.pos.y };
+            ultimaPosicao = { x: ci.pos.x, y: ci.pos.y };
             cobraInimigaRespawnTimer = Date.now() + 60000;
             
             setTimeout(() => {
-                Object.assign(cobraInimiga, {
+                Object.assign(ci, {
                     pos: { x: ultimaPosicao.x, y: ultimaPosicao.y },
                     vel: { x: 0, y: 0 },
                     rastro: [],
@@ -904,7 +912,7 @@ var meuGame = () => {
     
     //renderiza um indicador visual de contagem regressiva volta da cobrinha inimiga
     function desenharTimerRespawn() {
-        if (!cobraInimiga.ativa && cobraInimigaRespawnTimer) {
+        if (!ci.ativa && cobraInimigaRespawnTimer) {
             const tempoRestante = Math.ceil((cobraInimigaRespawnTimer - Date.now()) / 1000);
             if (tempoRestante > 0) {
                 ctx.fillStyle = "red";
@@ -917,10 +925,10 @@ var meuGame = () => {
     
     // desenha o feedback visual de ganho e perda
     function desenharFeedback() {
-        if (gameState.feedbackJogador.ativo) {
-            ctx.fillStyle = gameState.feedbackJogador.cor;
+        if (gs.feedbackJogador.ativo) {
+            ctx.fillStyle = gs.feedbackJogador.cor;
             ctx.font = "bold 12px monospace";
-            ctx.fillText(gameState.feedbackJogador.texto, gameState.feedbackJogador.x, gameState.feedbackJogador.y);
+            ctx.fillText(gs.feedbackJogador.texto, gs.feedbackJogador.x, gs.feedbackJogador.y);
         }
         
         if (feedbackInimiga.ativo) {
@@ -933,38 +941,38 @@ var meuGame = () => {
     
     //colisao da cobrinha inimiga com jogador e feedback visual
     function checarColisaoComCobraInimiga() {
-        const cabecaInimiga = cobraInimiga.rastro[cobraInimiga.rastro.length - 1];
-        const cabecaJogador = gameState.rastro[gameState.rastro.length - 1];
+        const cabecaInimiga = ci.rastro[ci.rastro.length - 1];
+        const cabecaJogador = gs.rastro[gs.rastro.length - 1];
         
         //se jogador colidir com rastro da cobrinha inimiga +1 e jogador -1
-        if (!cobraInimiga.morta) {
-            for (let i = 0; i < cobraInimiga.rastro.length - 1; i++) {
+        if (!ci.morta) {
+            for (let i = 0; i < ci.rastro.length - 1; i++) {
                 if (
-                    gameState.rastro.length > 0 &&
-                    cobraInimiga.rastro[i].x === cabecaJogador.x &&
-                    cobraInimiga.rastro[i].y === cabecaJogador.y
+                    gs.rastro.length > 0 &&
+                    ci.rastro[i].x === cabecaJogador.x &&
+                    ci.rastro[i].y === cabecaJogador.y
                 ) {
                     // Jogador ganha 1, inimiga perde 1
-                    gameState.tail++;
-                    gameState.pontuacao += 1;
-                    gameState.atualizarPontuacao();
+                    gs.tail++;
+                    gs.pontuacao += 1;
+                    gs.atualizarPontuacao();
                     
-                    if (cobraInimiga.tail > 1) cobraInimiga.tail--;
+                    if (ci.tail > 1) ci.tail--;
                     
                     // feedback jogador +1
-                    gameState.feedbackJogador.ativo = true;
-                    gameState.feedbackJogador.texto = "+1";
-                    gameState.feedbackJogador.x = cabecaJogador.x * gameState.tamanhoDaPeca + 10;
-                    gameState.feedbackJogador.y = cabecaJogador.y * gameState.tamanhoDaPeca - 4;
+                    gs.feedbackJogador.ativo = true;
+                    gs.feedbackJogador.texto = "+1";
+                    gs.feedbackJogador.x = cabecaJogador.x * gs.tamanhoDaPeca + 10;
+                    gs.feedbackJogador.y = cabecaJogador.y * gs.tamanhoDaPeca - 4;
                     
                     //feedback inimiga -1
                     feedbackInimiga.ativo = true;
                     feedbackInimiga.texto = "-1";
-                    feedbackInimiga.x = cabecaInimiga.x * gameState.tamanhoDaPeca + 10;
-                    feedbackInimiga.y = cabecaInimiga.y * gameState.tamanhoDaPeca - 4;
+                    feedbackInimiga.x = cabecaInimiga.x * gs.tamanhoDaPeca + 10;
+                    feedbackInimiga.y = cabecaInimiga.y * gs.tamanhoDaPeca - 4;
                     
                     setTimeout(() => {
-                        gameState.feedbackJogador.ativo = false;
+                        gs.feedbackJogador.ativo = false;
                         feedbackInimiga.ativo = false;
                     }, 500);
                 }
@@ -972,32 +980,32 @@ var meuGame = () => {
         }
         
         //se cobrinha inimiga colidir com rastro do jogador, ela anha +1 e jogador -1
-        if (!gameState.temPoder) {
-            for (let i = 0; i < gameState.rastro.length - 1; i++) {
+        if (!gs.temPoder) {
+            for (let i = 0; i < gs.rastro.length - 1; i++) {
                 if (
-                    gameState.rastro[i].x === cabecaInimiga.x &&
-                    gameState.rastro[i].y === cabecaInimiga.y
+                    gs.rastro[i].x === cabecaInimiga.x &&
+                    gs.rastro[i].y === cabecaInimiga.y
                 ) {
-                    if (!cobraInimiga.morta) {
-                        if (gameState.tail > 1) gameState.tail--;
-                        cobraInimiga.tail++;
-                        gameState.pontuacao -= 1;
-                        gameState.atualizarPontuacao();
+                    if (!ci.morta) {
+                        if (gs.tail > 1) gs.tail--;
+                        ci.tail++;
+                        gs.pontuacao -= 1;
+                        gs.atualizarPontuacao();
                         
                         // Feedback jogador -1
-                        gameState.feedbackJogador.ativo = true;
-                        gameState.feedbackJogador.texto = "-1";
-                        gameState.feedbackJogador.x = cabecaJogador.x * gameState.tamanhoDaPeca + 10;
-                        gameState.feedbackJogador.y = cabecaJogador.y * gameState.tamanhoDaPeca - 4;
+                        gs.feedbackJogador.ativo = true;
+                        gs.feedbackJogador.texto = "-1";
+                        gs.feedbackJogador.x = cabecaJogador.x * gs.tamanhoDaPeca + 10;
+                        gs.feedbackJogador.y = cabecaJogador.y * gs.tamanhoDaPeca - 4;
                         
                         // Feedback inimiga +1
                         feedbackInimiga.ativo = true;
                         feedbackInimiga.texto = "+1";
-                        feedbackInimiga.x = cabecaInimiga.x * gameState.tamanhoDaPeca + 10;
-                        feedbackInimiga.y = cabecaInimiga.y * gameState.tamanhoDaPeca - 4;
+                        feedbackInimiga.x = cabecaInimiga.x * gs.tamanhoDaPeca + 10;
+                        feedbackInimiga.y = cabecaInimiga.y * gs.tamanhoDaPeca - 4;
                         
                         setTimeout(() => {
-                            gameState.feedbackJogador.ativo = false;
+                            gs.feedbackJogador.ativo = false;
                             feedbackInimiga.ativo = false;
                         }, 500);
                     }
@@ -1009,20 +1017,20 @@ var meuGame = () => {
     
     //verifica se o inimigo pegou a maca
     function verificarColisaoInimigoComMaca() {
-        const cabecaInimiga = cobraInimiga.rastro[cobraInimiga.rastro.length - 1];
+        const cabecaInimiga = ci.rastro[ci.rastro.length - 1];
         
-        if (cobraInimiga.pos.x === gameState.maca.x && cobraInimiga.pos.y === gameState.maca.y) {
-            cobraInimiga.tail++;
+        if (ci.pos.x === gs.maca.x && ci.pos.y === gs.maca.y) {
+            ci.tail++;
             posicaoMaca();
             
             //feedback +1
             feedbackInimiga.ativo = true;
             feedbackInimiga.texto = "+1";
-            feedbackInimiga.x = cabecaInimiga.x * gameState.tamanhoDaPeca + 10;
-            feedbackInimiga.y = cabecaInimiga.y * gameState.tamanhoDaPeca - 4;
+            feedbackInimiga.x = cabecaInimiga.x * gs.tamanhoDaPeca + 10;
+            feedbackInimiga.y = cabecaInimiga.y * gs.tamanhoDaPeca - 4;
             
             setTimeout(() => {
-                gameState.feedbackJogador.ativo = false;
+                gs.feedbackJogador.ativo = false;
                 feedbackInimiga.ativo = false;
             }, 500);
             
@@ -1045,18 +1053,18 @@ var meuGame = () => {
     //verifica colisao da cobra e aura com a maca
     function verificaColisaoCobraOuAuraComMaca() {
         // colisao cobra e maça sem poder
-        const colidiuComCobra = (gameState.maca.x === gameState.pos.x && gameState.maca.y === gameState.pos.y);
+        const colidiuComCobra = (gs.maca.x === gs.pos.x && gs.maca.y === gs.pos.y);
         
         let colidiuComAura = false;
-        if (gameState.temPoder) {
-            const cx = (gameState.pos.x + 0.5) * gameState.tamanhoDaPeca;
-            const cy = (gameState.pos.y + 0.5) * gameState.tamanhoDaPeca;
-            const raioAura = gameState.tamanhoDaPeca * 2.2;
+        if (gs.temPoder) {
+            const cx = (gs.pos.x + 0.5) * gs.tamanhoDaPeca;
+            const cy = (gs.pos.y + 0.5) * gs.tamanhoDaPeca;
+            const raioAura = gs.tamanhoDaPeca * 2.2;
             
-            const rx = gameState.maca.x * gameState.tamanhoDaPeca;
-            const ry = gameState.maca.y * gameState.tamanhoDaPeca;
+            const rx = gs.maca.x * gs.tamanhoDaPeca;
+            const ry = gs.maca.y * gs.tamanhoDaPeca;
             
-            if (colisaoCirculoRetangulo(cx, cy, raioAura, rx, ry, gameState.tamanhoDaPeca, gameState.tamanhoDaPeca)) {
+            if (colisaoCirculoRetangulo(cx, cy, raioAura, rx, ry, gs.tamanhoDaPeca, gs.tamanhoDaPeca)) {
                 colidiuComAura = true;
             }
         }
@@ -1065,55 +1073,55 @@ var meuGame = () => {
         if (colidiuComCobra || colidiuComAura) {
             if (colidiuComAura) {
                 explodirParticulas(
-                    gameState.maca.x * gameState.tamanhoDaPeca + gameState.tamanhoDaPeca / 2,
-                    gameState.maca.y * gameState.tamanhoDaPeca + gameState.tamanhoDaPeca / 2,
+                    gs.maca.x * gs.tamanhoDaPeca + gs.tamanhoDaPeca / 2,
+                    gs.maca.y * gs.tamanhoDaPeca + gs.tamanhoDaPeca / 2,
                     "#00ff88"
                 );
             }
             
-            gameState.tail++;
+            gs.tail++;
             posicaoMaca();
             
-            gameState.pontuacao += 1;
-            gameState.atualizarPontuacao();
+            gs.pontuacao += 1;
+            gs.atualizarPontuacao();
             
             // mostrar +1 verde com feedback Jogador, só se NÃO estiver com poder
-            if (!gameState.temPoder) {
-                gameState.feedbackJogador.ativo = true;
-                gameState.feedbackJogador.texto = "+1";
-                gameState.feedbackJogador.cor = "#00ff88";
+            if (!gs.temPoder) {
+                gs.feedbackJogador.ativo = true;
+                gs.feedbackJogador.texto = "+1";
+                gs.feedbackJogador.cor = "#00ff88";
                 
-                gameState.feedbackJogador.x = gameState.pos.x * gameState.tamanhoDaPeca + 10;
-                gameState.feedbackJogador.y = gameState.pos.y * gameState.tamanhoDaPeca - 4;
+                gs.feedbackJogador.x = gs.pos.x * gs.tamanhoDaPeca + 10;
+                gs.feedbackJogador.y = gs.pos.y * gs.tamanhoDaPeca - 4;
                 
-                setTimeout(() => gameState.feedbackJogador.ativo = false, 800);
+                setTimeout(() => gs.feedbackJogador.ativo = false, 800);
             }
-            gameState.atualizarPontuacao();
+            gs.atualizarPontuacao();
         }
     }
     
     
     //verifica colisao da cobra com o poder
     function verificaColisaoCobraEPoder() {
-        if (gameState.poder.x == gameState.pos.x && gameState.poder.y == gameState.pos.y) {
-            gameState.poderVisivel = false;
+        if (gs.poder.x == gs.pos.x && gs.poder.y == gs.pos.y) {
+            gs.poderVisivel = false;
             //ativa e remove poder
-            if (!gameState.temPoder) {
-                gameState.temPoder = true;
+            if (!gs.temPoder) {
+                gs.temPoder = true;
                 
                 setTimeout(function() {
-                    gameState.temPoder = false;
+                    gs.temPoder = false;
                 }, 7000);
                 
                 //mostr o tempo  restante do poder
-                gameState.poderTempo = 7;
+                gs.poderTempo = 7;
                 
-                for (let i = 0; i <= gameState.poderTempo; i++) {
+                for (let i = 0; i <= gs.poderTempo; i++) {
                     setTimeout(() => {
-                        if (gameState.poderTempo - i === 0) {
+                        if (gs.poderTempo - i === 0) {
                             document.getElementById("tempo-poder").innerHTML = " ";
                         } else {
-                            document.getElementById("tempo-poder").innerHTML = `${gameState.poderTempo - i}`
+                            document.getElementById("tempo-poder").innerHTML = `${gs.poderTempo - i}`
                         }
                     }, 1000 * i);
                 }
@@ -1122,7 +1130,7 @@ var meuGame = () => {
             // espera para atualizar a nova posiçao da maça
             setTimeout(() => {
                 posicaoPoder();
-                gameState.poderVisivel = true;
+                gs.poderVisivel = true;
             }, 15000);
         }
     }
@@ -1130,19 +1138,19 @@ var meuGame = () => {
     
     //desenha rastro
     function desenhaRastro() {
-        gameState.rastro.push({
-            x: gameState.pos.x,
-            y: gameState.pos.y
+        gs.rastro.push({
+            x: gs.pos.x,
+            y: gs.pos.y
         });
         
-        while (gameState.rastro.length > gameState.tail) {
-            gameState.rastro.shift();
+        while (gs.rastro.length > gs.tail) {
+            gs.rastro.shift();
         }
     }
     
     
     function desenharFeedbackBits() {
-        gameState.feedbackBits.forEach((f, i) => {
+        gs.feedbackBits.forEach((f, i) => {
             ctx.fillStyle = "#00ff88";
             ctx.font = "bold 12px monospace";
             ctx.fillText(f.texto, f.x, f.y);
@@ -1151,7 +1159,7 @@ var meuGame = () => {
             f.tempo--;
             
             if (f.tempo <= 0) {
-                gameState.feedbackBits.splice(i, 1); // remove quando tempo acabar
+                gs.feedbackBits.splice(i, 1); // remove quando tempo acabar
             }
         });
     }
@@ -1159,46 +1167,46 @@ var meuGame = () => {
     
     // Verifica se a cobra colidiu com algum sistema e entrega os bits necessários
     function verificarEntregaDeBits() {
-        const cobraX = gameState.pos.x * gameState.tamanhoDaPeca;
-        const cobraY = gameState.pos.y * gameState.tamanhoDaPeca;
+        const cobraX = gs.pos.x * gs.tamanhoDaPeca;
+        const cobraY = gs.pos.y * gs.tamanhoDaPeca;
         
-        gameState.sistemas.forEach((sistema, i) => {
-            if (sistema.completo || i !== gameState.sistemaAtual) return;
+        gs.sistemas.forEach((sistema, i) => {
+            if (sistema.completo || i !== gs.sistemaAtual) return;
             
             const colisao = cobraX < sistema.x + sistema.largura &&
-                cobraX + gameState.tamanhoDaPeca > sistema.x &&
+                cobraX + gs.tamanhoDaPeca > sistema.x &&
                 cobraY < sistema.y + sistema.altura &&
-                cobraY + gameState.tamanhoDaPeca > sistema.y;
+                cobraY + gs.tamanhoDaPeca > sistema.y;
             
-            if (colisao && gameState.pontuacao > 0) {
+            if (colisao && gs.pontuacao > 0) {
                 const falta = sistema.meta - sistema.bits;
-                const entregue = Math.min(falta, gameState.pontuacao);
+                const entregue = Math.min(falta, gs.pontuacao);
                 
                 sistema.bits += entregue;
-                gameState.pontuacao -= entregue;
-                gameState.atualizarPontuacao();
-                gameState.tail = Math.max(1, gameState.tail - entregue);
+                gs.pontuacao -= entregue;
+                gs.atualizarPontuacao();
+                gs.tail = Math.max(1, gs.tail - entregue);
                 
                 //feedback visual
-                gameState.feedbackBits.push({
+                gs.feedbackBits.push({
                     x: sistema.x + sistema.largura / 2,
                     y: sistema.y - 10,
                     texto: `+${entregue} bits`,
                     tempo: 60 //frames para desaparecer
                 });
                 
-                while (gameState.rastro.length > gameState.tail) {
-                    gameState.rastro.shift();
+                while (gs.rastro.length > gs.tail) {
+                    gs.rastro.shift();
                 }
                 
                 if (sistema.bits >= sistema.meta) {
                     sistema.completo = true;
-                    gameState.sistemaAtual++;
+                    gs.sistemaAtual++;
                 }
             
-                const todosCompletos = gameState.sistemas.every(s => s.completo);
-                if (todosCompletos && !gameState.ganhou) {
-                    gameState.vitoria();
+                const todosCompletos = gs.sistemas.every(s => s.completo);
+                if (todosCompletos && !gs.ganhou) {
+                    gs.vitoria();
                 }
             }
         });
@@ -1210,23 +1218,24 @@ var meuGame = () => {
     
     //funcao para  atualizar a nova posiçao do poder
     function posicaoPoder() {
-        gameState.poder.x = Math.floor(Math.random() * gameState.quantidadeDePeca);
-        gameState.poder.y = Math.floor(Math.random() * gameState.quantidadeDePeca);
+        gs.poder.x = Math.floor(Math.random() * gs.quantidadeDePeca);
+        gs.poder.y = Math.floor(Math.random() * gs.quantidadeDePeca);
         
-        gameState.poderVisivel = true;
+        gs.poderVisivel = true;
         desenharPoder();
     }
     
     
     //funcao para  atualizar a nova posiçao da maça
     function posicaoMaca() {
-        gameState.maca.x = Math.floor(Math.random() * gameState.quantidadeDePeca);
-        gameState.maca.y = Math.floor(Math.random() * gameState.quantidadeDePeca);
+        gs.maca.x = Math.floor(Math.random() * gs.quantidadeDePeca);
+        gs.maca.y = Math.floor(Math.random() * gs.quantidadeDePeca);
     }
     
     
     // === INICIA AUTOMATICAMENTE ===
-    gameState.initUI();
+    gs.initUI();
+    
     
     // === RENDERIZAÇÃO ===
     desenhaTabuleiro();
@@ -1244,6 +1253,7 @@ var meuGame = () => {
     desenharFeedback();
     desenharFeedbackBits();
     
+    
     // === DETECÇÃO DE COLISÕES ===
     verificarEntregaDeBits();
     verificaColisaoCobraOuAuraComMaca();
@@ -1252,19 +1262,21 @@ var meuGame = () => {
     checarColisaoComCobraInimiga();
     verificarColisaoInimigoComMaca();
     
+    
     // === CONFIGURACOES ===
-    gameState.configurarBotoes();
-    gameState.configurarControles();
+    gs.configurarBotoes();
+    gs.configurarControles();
 };
+
 
 // === GAME LOOP ===
 function gameLoop(agora) {
-    if (gameState.jogoPausado || gameState.jogoFinalizado) return;
+    if (gs.jogoPausado || gs.jogoFinalizado) return;
 
-    const delta = agora - gameState.ultimoFrame;
+    const delta = agora - gs.ultimoFrame;
     
-    if (delta >= gameState.tempoVelocidade) {
-        gameState.ultimoFrame = agora;
+    if (delta >= gs.tempoVelocidade) {
+        gs.ultimoFrame = agora;
         meuGame();
     }
     
@@ -1273,10 +1285,10 @@ function gameLoop(agora) {
 
 
 window.onload = () => {
-    gameState.initUI();
-    gameState.ultimoFrame = performance.now();
+    gs.initUI();
+    gs.ultimoFrame = performance.now();
     
-    gameState.tempo = 300;
-    gameState.contarTempo();
+    gs.tempo = 300;
+    gs.contarTempo();
     requestAnimationFrame(gameLoop);
 };
