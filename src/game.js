@@ -1,4 +1,4 @@
-mport { controlePc, controleMobile } from "./controles.js";
+import { controlePc, controleMobile } from "./controles.js";
 
 const gameState = {
     canvas: document.querySelector("#gameCanvas"),
