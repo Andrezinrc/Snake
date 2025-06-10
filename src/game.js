@@ -250,6 +250,7 @@ const gameState = {
 //evitar verbosidade e acessar o gameState
 const gs = gameState;
 
+let pulsar = 0;
 
 let alvo;
 let delayInimiga = 0;
@@ -267,7 +268,7 @@ let cobraInimiga = {
     vel: { x: 0, y: 0 },
     velAnterior: { x: null, y: null },
     rastro: [],
-    tail: 15,
+    tail: 16,
     cor: "#ff0033",
     ativa: true,
     morta: false,
@@ -300,15 +301,26 @@ var meuGame = () => {
     
     
     function linhas(ctx, largura, altura) {
-        
         ctx.fillStyle = '#0a0a14';
         ctx.fillRect(0, 0, largura, altura);
         
-        const step = 20;
+        const gradient = ctx.createRadialGradient(
+            largura / 2, altura / 2, 10,
+            largura / 2, altura / 2, largura
+        );
+        gradient.addColorStop(0, "rgba(0, 200, 255, 0.03)");
+        gradient.addColorStop(1, "transparent");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, largura, altura);
         
-        ctx.strokeStyle = 'rgba(0, 200, 255, 0.1)';
+        // Pulsação nas linhas da grade
+        pulsar += 0.02;
+        const alpha = 0.1 + Math.sin(pulsar) * 0.05;
+        
+        ctx.strokeStyle = `rgba(0, 200, 255, ${alpha})`;
         ctx.lineWidth = 1;
         
+        const step = 20;
         for (let x = 0; x <= largura; x += step) {
             ctx.beginPath();
             ctx.moveTo(x, 0);
@@ -322,7 +334,34 @@ var meuGame = () => {
             ctx.stroke();
         }
     }
-        
+    
+    
+    // Partículas de dados
+    let particulas = Array.from({ length: 30 }, () => ({
+        x: Math.random() * 350,
+        y: Math.random() * 350,
+        r: Math.random() * 2 + 0.5,
+        dy: Math.random() * 0.5 + 0.2
+    }));
+    
+    
+    //desenha particulas
+    function desenhaParticulas(ctx) {
+        ctx.fillStyle = "rgba(0, 255, 255, 0.3)";
+        for (let p of particulas) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+            
+            p.y += p.dy;
+            if (p.y > 350) {
+                p.y = 0;
+                p.x = Math.random() * 350;
+            }
+        }
+    }
+    
+    
     //desenha tanbuleiro do jogo
     function desenhaTabuleiro() {
         ctx.clearRect(0, 0, gs.canvas.width, gs.canvas.height);
@@ -332,6 +371,7 @@ var meuGame = () => {
         gs.canvas.height = 350;
         
         linhas(ctx, gs.canvas.width, gs.canvas.height);
+        desenhaParticulas(ctx);
         desenharGrade();
         desenharPixelsVivos();
         
@@ -347,8 +387,8 @@ var meuGame = () => {
         ci.pos.x = Math.max(0, Math.min(gs.quantidadeDePeca - 1, ci.pos.x));
         ci.pos.y = Math.max(0, Math.min(gs.quantidadeDePeca - 1, ci.pos.y));
     }
-    
-    
+        
+        
     // desenha visualmente o terminal/sistema no tabuleiro
     function desenharTerminais(ctx) {
         gs.sistemas.forEach((sistema, i) => {
@@ -511,7 +551,7 @@ var meuGame = () => {
                     ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
                     ctx.strokeText(bit, x + 3, y + 8);
                     ctx.fillText(bit, x + 3, y + 8);
-                    ctx.lineWidth = 1
+                    ctx.lineWidth = 1;
                 }
             } else {
                 if (isCabeca) {
