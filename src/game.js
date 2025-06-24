@@ -301,7 +301,7 @@ var meuGame = () => {
     
     
     function linhas(ctx, largura, altura) {
-        ctx.fillStyle = '#0a0a14';
+        ctx.fillStyle = '#101820';
         ctx.fillRect(0, 0, largura, altura);
         
         const gradient = ctx.createRadialGradient(
@@ -536,20 +536,18 @@ var meuGame = () => {
                     ctx.fillStyle = "#9B59FF";
                     ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
                 } else {
-                    ctx.fillStyle = "rgba(108, 92, 231, 0.5)";
+                    ctx.fillStyle = "#2a0033";
                     ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
                 }
                 
                 // Bits roxos
                 if (!isCabeca) {
-                    ctx.fillStyle = "#9B59FF";
+                    ctx.fillStyle = "#6c5ce7";
                     ctx.font = "bold 10px monospace";
                     
                     const bit = Math.random() > 0.5 ? "1" : "0";
                     
                     ctx.lineWidth = 2;
-                    ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
-                    ctx.strokeText(bit, x + 3, y + 8);
                     ctx.fillText(bit, x + 3, y + 8);
                     ctx.lineWidth = 1;
                 }
@@ -641,7 +639,7 @@ var meuGame = () => {
                 
                 const isCabeca = i === ci.rastro.length - 1;
                 
-                ctx.fillStyle = isCabeca ? "#ff0033" : "#2a0000";
+                ctx.fillStyle = isCabeca ? "#ff0033" : "#400000";
                 ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
                 
                 //desenha barrinha de vida
