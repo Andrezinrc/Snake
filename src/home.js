@@ -1,3 +1,7 @@
+window.addEventListener('touchmove', e => {
+    e.preventDefault();
+}, { passive: false });
+
 document.addEventListener("DOMContentLoaded", function() {
     let btnMenu = document.getElementById("btn-menu");
     let menu = document.getElementById("menu");
