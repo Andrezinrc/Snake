@@ -1,12 +1,15 @@
 import { controlePc, controleSwipeMobile } from "./controles.js";
 
+window.addEventListener('touchmove', e => {
+    e.preventDefault();
+}, { passive: false });
+
 const gameState = {
     canvas: document.querySelector("#gameCanvas"),
     
     //Elementos da interface
     container: document.querySelector(".container"),
     mensagem_final: document.getElementById("mensagem-final"),
-    botoes: document.getElementById("botoes"),
     pausar: document.getElementById("pausar"),
     continuar: document.getElementById("continuar"),
     jogarNovamente: document.getElementById("jogar-novamente"),
@@ -129,7 +132,7 @@ const gameState = {
         
         clearInterval(this.movimenta);
         clearInterval(this.contagem);
-        botoes.style.display = "none";
+        
         continuar.style.display = "block";
         sair.style.display = "block";
         pausar.style.display = "none";
@@ -156,7 +159,6 @@ const gameState = {
         
         this.movimenta = setInterval(meuGame, this.tempoVelocidade);
         this.contarTempo();
-        botoes.style.display = "block";
         pausar.style.display = "block";
         continuar.style.display = "none";
         sair.style.display = "none";
@@ -179,7 +181,6 @@ const gameState = {
         this.mensagem_final.style.color = "green";
         document.getElementById("mensagem-final").innerText = "DADOS ENTREGUES!";
         this.pausar.style.display = "none";
-        this.botoes.style.display = "none";
         this.jogarNovamente.style.display = "block";
         this.voltar.style.display = "block";
         
@@ -201,7 +202,6 @@ const gameState = {
         this.mensagem_final.style.display = "block";
         document.getElementById("mensagem-final").innerText = "ERRO FATAL!";
         this.pausar.style.display = "none";
-        this.botoes.style.display = "none";
         this.jogarNovamente.style.display = "block";
         this.voltar.style.display = "block";
         
