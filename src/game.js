@@ -1,4 +1,4 @@
-import { controlePc, controleMobile } from "./controles.js";
+import { controlePc, controleSwipeMobile } from "./controles.js";
 
 const gameState = {
     canvas: document.querySelector("#gameCanvas"),
@@ -242,7 +242,7 @@ const gameState = {
         this.controlesConfigurados = true;
         
         document.addEventListener("keydown", (event) => controlePc(event, this));
-        controleMobile(this);
+        controleSwipeMobile(this);
     }
 };
 
