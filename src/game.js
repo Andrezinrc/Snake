@@ -531,43 +531,20 @@ var meuGame = () => {
             const y = gs.rastro[i].y * gs.tamanhoDaPeca;
             const isCabeca = i === gs.rastro.length - 1;
             
-            if (gs.temPoder) {
-                if (isCabeca) {
-                    ctx.fillStyle = "#9B59FF";
-                    ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
-                } else {
-                    ctx.fillStyle = "#2a0033";
-                    ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
-                }
-                
-                // Bits roxos
-                if (!isCabeca) {
-                    ctx.fillStyle = "#6c5ce7";
-                    ctx.font = "bold 10px monospace";
-                    
-                    const bit = Math.random() > 0.5 ? "1" : "0";
-                    
-                    ctx.lineWidth = 2;
-                    ctx.fillText(bit, x + 3, y + 8);
-                    ctx.lineWidth = 1;
-                }
+            if (isCabeca) {
+                ctx.fillStyle = "#00ffaa";
+                ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
             } else {
-                if (isCabeca) {
-                    ctx.fillStyle = "#00ffaa";
-                    ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
-                } else {
-                    ctx.fillStyle = "#002a1e";
-                    ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
-                    
-                    ctx.strokeStyle = "#003322";
-                    ctx.strokeRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
-                    
-                    // bits verdes
-                    ctx.fillStyle = "rgba(0,255,140,0.5)";
-                    ctx.font = "bold 10px monospace";
-                    const bit = Math.random() > 0.5 ? "1" : "0";
-                    ctx.fillText(bit, x + 3, y + 8);
-                }
+                ctx.fillStyle = "#002a1e";
+                ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
+                ctx.strokeStyle = "#003322";
+                ctx.strokeRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
+                
+                // bits verdes
+                ctx.fillStyle = "rgba(0,255,140,0.5)";
+                ctx.font = "bold 10px monospace";
+                const bit = Math.random() > 0.5 ? "1" : "0";
+                ctx.fillText(bit, x + 3, y + 8);
             }
             
             // Colisão com o próprio corpo
