@@ -6,7 +6,7 @@
 }
 
 body {
-  background-color: #000000;
+  background-color: #0d1117;
   animation: gradientBG 15s ease infinite;
   display: flex;
   flex-direction: column;
@@ -26,7 +26,8 @@ body {
 canvas{
   width: 350px !important;
   height: 350px !important;
-  border: 1px solid rgba(0, 184, 148, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.05);
   touch-action: manipulation;
 }
 
@@ -132,15 +133,6 @@ body {
   }
 }
 
-.botões,
-.controle,
-#cima,
-#baixo,
-#esquerda,
-#direita {
-  display: none;
-}
-
 .jogar-novamente{
   display: none;
   position: absolute;
@@ -166,18 +158,19 @@ body {
 .botao-pause,
 .continuar,
 .sair{
-  border-radius: 8px;
-  color: white;
-  background-color: #6C5CE7;
+  border-radius: 8px;;
+  background-color: #1e2b30;
+  font-family: 'Orbitron', monospace;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #00ffff;
   border: 0;
-  font-size: 20px;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: 0.2s ease-in-out;
 }
 
 .jogar-novamente:hover,
 .botao-voltar:hover {
-  background-color: #5B4CD3;
-  cursor: pointer;
+  box-shadow: 0 0 6px #00ffff55, 0 0 10px #00ffff33;
   transform: scale(1.03);
 }
 
@@ -258,14 +251,12 @@ body {
 }
 
 .botao-pause:hover {
-  background-color: #5B4CD3;
-  cursor: pointer;
+  box-shadow: 0 0 6px #00ffff55, 0 0 10px #00ffff33;
   transform: scale(1.03);
 }
 
 .continuar:hover {
-  background-color: #5B4CD3;
-  cursor: pointer;
+  box-shadow: 0 0 6px #00ffff55, 0 0 10px #00ffff33;
   transform: scale(1.03);
 }
 
@@ -277,8 +268,7 @@ body {
 }
 
 .sair:hover {
-  background-color: #5B4CD3;
-  cursor: pointer;
+  box-shadow: 0 0 6px #00ffff55, 0 0 10px #00ffff33;
   transform: scale(1.03);
 }
 

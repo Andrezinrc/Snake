@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     
-    ctx.fillStyle = "#0f0f1a";
+    ctx.fillStyle = "#0d1117";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     canvas.style.opacity = .9;
     
