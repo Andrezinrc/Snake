@@ -249,6 +249,7 @@ const gameState = {
 
 //evitar verbosidade e acessar o gameState
 const gs = gameState;
+const bordaParticulas = [];
 
 let pulsar = 0;
 
@@ -288,6 +289,7 @@ const ctx = gs.canvas.getContext("2d");
 var meuGame = () => {
     if (gs.jogoPausado) return;
     console.log("Game rodando", gs.vel.x, gs.vel.y);
+    inicializaParticulasBorda(30, gs.canvas.width);
     
     gs.tempoAtual = performance.now();
     
@@ -324,6 +326,66 @@ var meuGame = () => {
         }
     }
     
+    function inicializaParticulasBorda(qtde, tamanhoCanvas) {
+        bordaParticulas.length = 0;
+        for (let i = 0; i < qtde; i++) {
+            // sorteia posicao aleatoria em cima, baixo, esquerda ou direita
+            const lado = Math.floor(Math.random() * 4);
+            let x, y;
+            switch (lado) {
+                case 0: // topo
+                    x = Math.random() * tamanhoCanvas;
+                    y = 0;
+                    break;
+                case 1: // direita
+                    x = tamanhoCanvas;
+                    y = Math.random() * tamanhoCanvas;
+                    break;
+                case 2: // base
+                    x = Math.random() * tamanhoCanvas;
+                    y = tamanhoCanvas;
+                    break;
+                case 3: // esquerda
+                    x = 0;
+                    y = Math.random() * tamanhoCanvas;
+                    break;
+            }
+            bordaParticulas.push({
+                x,
+                y,
+                size: 2 + Math.random() * 3,
+                alpha: Math.random(),
+                alphaDir: Math.random() < 0.5 ? 1 : -1,
+                speed: 0.02 + Math.random() * 0.05
+            });
+        }
+    }
+    
+    function desenhaParticulasBorda(ctx) {
+        const tamanhoCanvas = gs.canvas.width;
+        
+        bordaParticulas.forEach(p => {
+            // Atualiza alfa pra piscar
+            p.alpha += p.alphaDir * p.speed;
+            if (p.alpha <= 0) {
+                p.alpha = 0;
+                p.alphaDir *= -1;
+            } else if (p.alpha >= 1) {
+                p.alpha = 1;
+                p.alphaDir *= -1;
+            }
+            
+            ctx.save();
+            ctx.fillStyle = `rgba(255, 50, 0, ${p.alpha})`; // vermelho queimando
+            ctx.shadowColor = `rgba(255, 100, 0, ${p.alpha})`;
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+    }
+        
     // desenha passagens para cobrinha
     function desenharPassagens() {
         const passageSize = 20; // tamanho da passagem
@@ -388,6 +450,7 @@ var meuGame = () => {
         gs.canvas.height = 350;
         
         desenhaParticulas(ctx);
+        desenhaParticulasBorda(ctx);
         desenharPixelsVivos();
         desenharPassagens();
         
@@ -1325,19 +1388,20 @@ var meuGame = () => {
 // === GAME LOOP ===
 function gameLoop(agora) {
     if (gs.jogoPausado || gs.jogoFinalizado) return;
-
-    const delta = agora - gs.ultimoFrame;
     
-    if (gs.temPoder) {
-        gs.tempoVelocidade = 90;
-        console.log("velocidade aumentada com o poder: ", gs.tempoVelocidade);
-    } else {
-        gs.tempoVelocidade = 105;
-        console.log("velocidade normal restaurada: ", gs.tempoVelocidade);
-    }
+    const delta = agora - gs.ultimoFrame;
     
     if (delta >= gs.tempoVelocidade) {
         gs.ultimoFrame = agora;
+        
+        if (gs.temPoder) {
+            gs.tempoVelocidade = 90;
+            console.log("velocidade aumentada com o poder: ", gs.tempoVelocidade);
+        } else {
+            gs.tempoVelocidade = 105;
+            console.log("velocidade normal restaurada: ", gs.tempoVelocidade);
+        }
+        
         meuGame();
     }
     
