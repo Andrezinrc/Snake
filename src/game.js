@@ -1,4 +1,4 @@
-import { controlePc, controleSwipeMobile } from "./controles.js";
+limport { controlePc, controleSwipeMobile } from "./controles.js";
 
 window.addEventListener('touchmove', e => {
     e.preventDefault();
@@ -309,23 +309,6 @@ var meuGame = () => {
         dy: Math.random() * 0.5 + 0.2
     }));
     
-    
-    //desenha particulas
-    function desenhaParticulas(ctx) {
-        ctx.fillStyle = "rgba(0, 255, 255, 0.3)";
-        for (let p of particulas) {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fill();
-            
-            p.y += p.dy;
-            if (p.y > 350) {
-                p.y = 0;
-                p.x = Math.random() * 350;
-            }
-        }
-    }
-    
     function inicializaParticulasBorda(qtde, tamanhoCanvas) {
         bordaParticulas.length = 0;
         for (let i = 0; i < qtde; i++) {
@@ -449,7 +432,6 @@ var meuGame = () => {
         gs.canvas.width = 350;
         gs.canvas.height = 350;
         
-        desenhaParticulas(ctx);
         desenhaParticulasBorda(ctx);
         desenharPixelsVivos();
         desenharPassagens();
