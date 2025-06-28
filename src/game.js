@@ -361,6 +361,60 @@ var meuGame = () => {
         }
     }
     
+    // desenha passagens para cobrinha
+    function desenharPassagens() {
+        const passageSize = 20; // tamanho da passagem
+        const passageHalf = passageSize / 2;
+        const canvasSize = gameState.canvas.width;
+        const center = canvasSize / 2;
+        
+        const alpha = 0.5 + 0.5 * Math.sin(pulsar);
+        
+        ctx.save();
+        
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = `rgba(0, 200, 255, ${alpha})`;
+        ctx.shadowColor = `rgba(0, 200, 255, ${alpha})`;
+        ctx.shadowBlur = 10;
+        
+        // Passagem superior
+        ctx.beginPath();
+        ctx.moveTo(center - passageHalf, 0);
+        ctx.lineTo(center + passageHalf, 0);
+        ctx.lineTo(center + passageHalf, passageSize);
+        ctx.lineTo(center - passageHalf, passageSize);
+        ctx.closePath();
+        ctx.stroke();
+        
+        // Passagem inferior
+        ctx.beginPath();
+        ctx.moveTo(center - passageHalf, canvasSize);
+        ctx.lineTo(center + passageHalf, canvasSize);
+        ctx.lineTo(center + passageHalf, canvasSize - passageSize);
+        ctx.lineTo(center - passageHalf, canvasSize - passageSize);
+        ctx.closePath();
+        ctx.stroke();
+        
+        // Passagem esquerda
+        ctx.beginPath();
+        ctx.moveTo(0, center - passageHalf);
+        ctx.lineTo(passageSize, center - passageHalf);
+        ctx.lineTo(passageSize, center + passageHalf);
+        ctx.lineTo(0, center + passageHalf);
+        ctx.closePath();
+        ctx.stroke();
+        
+        // passagem direita
+        ctx.beginPath();
+        ctx.moveTo(canvasSize, center - passageHalf);
+        ctx.lineTo(canvasSize - passageSize, center - passageHalf);
+        ctx.lineTo(canvasSize - passageSize, center + passageHalf);
+        ctx.lineTo(canvasSize, center + passageHalf);
+        ctx.closePath();
+        ctx.stroke();
+        
+        ctx.restore();
+    }
     
     //desenha tanbuleiro do jogo
     function desenhaTabuleiro() {
@@ -374,20 +428,60 @@ var meuGame = () => {
         desenhaParticulas(ctx);
         desenharGrade();
         desenharPixelsVivos();
+        desenharPassagens();
         
-        // movimentação e teletransporte
+        // movimentacao
         gs.pos.x += gs.vel.x;
         gs.pos.y += gs.vel.y;
         
-        if (gs.pos.x < 0) gs.pos.x = gs.quantidadeDePeca - 1;
-        if (gs.pos.x > gs.quantidadeDePeca - 1) gs.pos.x = 0;
-        if (gs.pos.y < 0) gs.pos.y = gs.quantidadeDePeca - 1;
-        if (gs.pos.y > gs.quantidadeDePeca - 1) gs.pos.y = 0;
+        // define meio do tabuleiro para as passagens
+        const meio = Math.floor(gs.quantidadeDePeca / 2);
+        const max = gs.quantidadeDePeca - 1;
         
-        ci.pos.x = Math.max(0, Math.min(gs.quantidadeDePeca - 1, ci.pos.x));
-        ci.pos.y = Math.max(0, Math.min(gs.quantidadeDePeca - 1, ci.pos.y));
+        // funcao que verifica se esta na passagem da borda
+        function estaNaPassagem(x, y) {
+            // passagens no meio das 4 bordas
+            return (
+                (y === 0 && x === meio) || // topo
+                (y === max && x === meio) || // base
+                (x === 0 && y === meio) || // esquerda
+                (x === max && y === meio) // direita
+            );
+        }
+        
+        // verifica colisão nas bordas
+        if (gs.pos.x < 0) {
+            if (estaNaPassagem(gs.quantidadeDePeca - 1, gs.pos.y)) {
+                gs.pos.x = max; // atravessa para a direita
+            } else {
+                gs.gameOver();
+            }
+        } else if (gs.pos.x > max) {
+            if (estaNaPassagem(0, gs.pos.y)) {
+                gs.pos.x = 0; // atravessa para a esquerda
+            } else {
+                gs.gameOver();
+            }
+        }
+        
+        if (gs.pos.y < 0) {
+            if (estaNaPassagem(gs.pos.x, max)) {
+                gs.pos.y = max; // atravessa para baixo
+            } else {
+                gs.gameOver();
+            }
+        } else if (gs.pos.y > max) {
+            if (estaNaPassagem(gs.pos.x, 0)) {
+                gs.pos.y = 0; // atravessa para cima
+            } else {
+                gs.gameOver();
+            }
+        }
+        
+        // corrige a posicao da cobra inimiga
+        ci.pos.x = Math.max(0, Math.min(max, ci.pos.x));
+        ci.pos.y = Math.max(0, Math.min(max, ci.pos.y));
     }
-        
         
     // desenha visualmente o terminal/sistema no tabuleiro
     function desenharTerminais(ctx) {
@@ -535,11 +629,9 @@ var meuGame = () => {
                 ctx.fillStyle = "#00ffaa";
                 ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
             } else {
-                ctx.fillStyle = "#002a1e";
+                ctx.fillStyle = "#00261a";
                 ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
-                ctx.strokeStyle = "#003322";
-                ctx.strokeRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
-                
+    
                 // bits verdes
                 ctx.fillStyle = "rgba(0,255,140,0.5)";
                 ctx.font = "bold 10px monospace";
@@ -616,7 +708,7 @@ var meuGame = () => {
                 
                 const isCabeca = i === ci.rastro.length - 1;
                 
-                ctx.fillStyle = isCabeca ? "#ff0033" : "#400000";
+                ctx.fillStyle = isCabeca ? "#ff0033" : "#4a0000";
                 ctx.fillRect(x, y, gs.tamanhoDaPeca - 1, gs.tamanhoDaPeca - 1);
                 
                 //desenha barrinha de vida
@@ -926,13 +1018,18 @@ var meuGame = () => {
     
     
     //renderiza um indicador visual de contagem regressiva volta da cobrinha inimiga
-    function desenharTimerRespawn() {
+        function desenharTimerRespawn() {
         if (!ci.ativa && cobraInimigaRespawnTimer) {
-            const tempoRestante = Math.ceil((cobraInimigaRespawnTimer - Date.now()) / 1000);
-            if (tempoRestante > 0) {
-                ctx.fillStyle = "red";
-                ctx.font = "bold 14px monospace";
+            const diff = cobraInimigaRespawnTimer - Date.now();
+            const tempoRestante = Math.max(0, Math.ceil(diff / 1000));
+            
+            ctx.fillStyle = "red";
+            ctx.font = "bold 14px monospace";
+            
+            if (diff > 0) {
                 ctx.fillText(`⚠ Inimiga volta em ${tempoRestante}s`, 10, 20);
+            } else {
+                ctx.fillText(`⚠ Inimiga voltou!`, 10, 20);
             }
         }
     }
@@ -1120,10 +1217,11 @@ var meuGame = () => {
     function verificaColisaoCobraEPoder() {
         if (gs.poder.x == gs.pos.x && gs.poder.y == gs.pos.y) {
             gs.poderVisivel = false;
+
             //ativa e remove poder
             if (!gs.temPoder) {
                 gs.temPoder = true;
-                
+
                 setTimeout(function() {
                     gs.temPoder = false;
                 }, 7000);
@@ -1290,6 +1388,14 @@ function gameLoop(agora) {
 
     const delta = agora - gs.ultimoFrame;
     
+    if (gs.temPoder) {
+        gs.tempoVelocidade = 90;
+        console.log("velocidade aumentada com o poder: ", gs.tempoVelocidade);
+    } else {
+        gs.tempoVelocidade = 105;
+        console.log("velocidade normal restaurada: ", gs.tempoVelocidade);
+    }
+    
     if (delta >= gs.tempoVelocidade) {
         gs.ultimoFrame = agora;
         meuGame();
@@ -1297,7 +1403,6 @@ function gameLoop(agora) {
     
     requestAnimationFrame(gameLoop);
 }
-
 
 window.onload = () => {
     gs.initUI();
