@@ -1,4 +1,4 @@
-limport { controlePc, controleSwipeMobile } from "./controles.js";
+import { controlePc, controleSwipeMobile } from "./controles.js";
 
 window.addEventListener('touchmove', e => {
     e.preventDefault();
