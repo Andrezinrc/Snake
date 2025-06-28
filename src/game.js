@@ -299,43 +299,6 @@ var meuGame = () => {
     
     // === ANBIENTE DO JOGO ===
     
-    
-    function linhas(ctx, largura, altura) {
-        ctx.fillStyle = '#101820';
-        ctx.fillRect(0, 0, largura, altura);
-        
-        const gradient = ctx.createRadialGradient(
-            largura / 2, altura / 2, 10,
-            largura / 2, altura / 2, largura
-        );
-        gradient.addColorStop(0, "rgba(0, 200, 255, 0.03)");
-        gradient.addColorStop(1, "transparent");
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, largura, altura);
-        
-        // Pulsação nas linhas da grade
-        pulsar += 0.02;
-        const alpha = 0.1 + Math.sin(pulsar) * 0.05;
-        
-        ctx.strokeStyle = `rgba(0, 200, 255, ${alpha})`;
-        ctx.lineWidth = 1;
-        
-        const step = 20;
-        for (let x = 0; x <= largura; x += step) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, altura);
-            ctx.stroke();
-        }
-        for (let y = 0; y <= altura; y += step) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(largura, y);
-            ctx.stroke();
-        }
-    }
-    
-    
     // Partículas de dados
     let particulas = Array.from({ length: 30 }, () => ({
         x: Math.random() * 350,
@@ -424,9 +387,7 @@ var meuGame = () => {
         gs.canvas.width = 350;
         gs.canvas.height = 350;
         
-        linhas(ctx, gs.canvas.width, gs.canvas.height);
         desenhaParticulas(ctx);
-        desenharGrade();
         desenharPixelsVivos();
         desenharPassagens();
         
@@ -527,27 +488,6 @@ var meuGame = () => {
             ctx.fillText(`${sistema.bits}b/${sistema.meta}b`, sistema.x + 10, sistema.y + 38);
         });
     }
-        
-    // desenha grade do tabuleiro
-    function desenharGrade() {
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
-        ctx.lineWidth = 1;
-        
-        for (let x = 0; x < gs.canvas.width; x += gs.tamanhoDaPeca) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, gs.canvas.height);
-            ctx.stroke();
-        }
-        
-        for (let y = 0; y < gs.canvas.height; y += gs.tamanhoDaPeca) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(gs.canvas.width, y);
-            ctx.stroke();
-        }
-    }
-    
     
     //desenha efeitos de chuvisco
     function desenharPixelsVivos() {
