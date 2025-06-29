@@ -312,58 +312,44 @@ var meuGame = () => {
     // desenha passagens para cobrinha
     function desenharPassagens() {
         const passageSize = 20; // tamanho da passagem
-        const passageHalf = passageSize / 2;
+        const half = passageSize / 2;
         const canvasSize = gameState.canvas.width;
         const center = canvasSize / 2;
         
-        const alpha = 0.5 + 0.5 * Math.sin(pulsar);
-        
         ctx.save();
-        
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = `rgba(0, 200, 255, ${alpha})`;
-        ctx.shadowColor = `rgba(0, 200, 255, ${alpha})`;
+        ctx.lineWidth = 2;
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.07)';
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+        ctx.shadowColor = 'rgba(0, 255, 255, 0.3)';
         ctx.shadowBlur = 10;
         
         // Passagem superior
         ctx.beginPath();
-        ctx.moveTo(center - passageHalf, 0);
-        ctx.lineTo(center + passageHalf, 0);
-        ctx.lineTo(center + passageHalf, passageSize);
-        ctx.lineTo(center - passageHalf, passageSize);
-        ctx.closePath();
+        ctx.rect(center - half, 0, passageSize, passageSize);
+        ctx.fill();
         ctx.stroke();
         
         // Passagem inferior
         ctx.beginPath();
-        ctx.moveTo(center - passageHalf, canvasSize);
-        ctx.lineTo(center + passageHalf, canvasSize);
-        ctx.lineTo(center + passageHalf, canvasSize - passageSize);
-        ctx.lineTo(center - passageHalf, canvasSize - passageSize);
-        ctx.closePath();
+        ctx.rect(center - half, canvasSize - passageSize, passageSize, passageSize);
+        ctx.fill();
         ctx.stroke();
         
         // Passagem esquerda
         ctx.beginPath();
-        ctx.moveTo(0, center - passageHalf);
-        ctx.lineTo(passageSize, center - passageHalf);
-        ctx.lineTo(passageSize, center + passageHalf);
-        ctx.lineTo(0, center + passageHalf);
-        ctx.closePath();
+        ctx.rect(0, center - half, passageSize, passageSize);
+        ctx.fill();
         ctx.stroke();
         
         // passagem direita
         ctx.beginPath();
-        ctx.moveTo(canvasSize, center - passageHalf);
-        ctx.lineTo(canvasSize - passageSize, center - passageHalf);
-        ctx.lineTo(canvasSize - passageSize, center + passageHalf);
-        ctx.lineTo(canvasSize, center + passageHalf);
-        ctx.closePath();
+        ctx.rect(canvasSize - passageSize, center - half, passageSize, passageSize);
+        ctx.fill();
         ctx.stroke();
         
         ctx.restore();
     }
-    
+        
     function inicializaParticulasBorda(qtde, tamanhoCanvas) {
         bordaParticulas.length = 0;
         for (let i = 0; i < qtde; i++) {
@@ -1372,8 +1358,6 @@ var meuGame = () => {
 function gameLoop(agora) {
     if (gs.jogoPausado || gs.jogoFinalizado) return;
     const delta = agora - gs.ultimoFrame;
-    
-    pulsar += 0.5;
     
     if (delta >= gs.tempoVelocidade) {
         gs.ultimoFrame = agora;
